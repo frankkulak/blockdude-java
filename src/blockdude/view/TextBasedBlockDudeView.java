@@ -34,7 +34,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
 
   @Override
   public void render(BlockDudeModel model) throws IllegalStateException {
-    // fixme the way player holding blocks are rendered physically pains me
+    // fixme the way a player holding a block is rendered physically pains me
     StringBuilder outputString = new StringBuilder();
 
     outputString.append("Level ").append(model.curLevelIndex());
@@ -86,7 +86,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
   private char charFor(GamePiece gp) throws IllegalArgumentException {
     // fixme I know this code is extremely ugly and brittle but it works for now
     if (gp instanceof Block) {
-      return '\u25A2'; // hallow box
+      return '\u25A2'; // hollow box
     } else if (gp instanceof Door) {
       return 'Π';
     } else if (gp instanceof Empty) {

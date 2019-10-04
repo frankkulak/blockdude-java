@@ -22,16 +22,16 @@ public class LevelSetFileReader {
   /**
    * Parses file with given name to generate level set for use in game.
    *
-   * @param fileName name of file to parse
+   * @param filename name of file to parse
    * @return level set created from input file
    * @throws IllegalArgumentException if file could not be found
    */
-  public static LevelSet parseLevelSetFile(String fileName) throws IllegalArgumentException {
+  public static LevelSet parseLevelSetFile(String filename) throws IllegalArgumentException {
     FileReader file;
     try {
-      file = new FileReader(fileName);
+      file = new FileReader(filename);
     } catch (FileNotFoundException e) {
-      throw new IllegalArgumentException("No file named " + fileName + " found.");
+      throw new IllegalArgumentException("No file named " + filename + " found.");
     }
     return LevelSetFileReader.parseLevelSetFile(file);
   }
