@@ -188,6 +188,12 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
+  public boolean playerIsHoldingSomething() throws IllegalStateException {
+    requireLevel();
+    return heldPiece != null;
+  }
+
+  @Override
   public String curLevelPassword() throws IllegalStateException {
     requireLevel();
     return level.password();

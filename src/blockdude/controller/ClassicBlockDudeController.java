@@ -118,6 +118,11 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
     this.nextLevel();
   }
 
+  @Override
+  public int currentLevelIndex() {
+    return levels.curLevelIndex();
+  }
+
   /**
    * Restarts the game from the first level.
    */

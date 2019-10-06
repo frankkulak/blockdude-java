@@ -24,6 +24,7 @@ public class BlockDude {
     BlockDudeModel model = new ClassicBlockDudeModel();
     BlockDudeView view = new TextBasedBlockDudeView(System.out);
     BlockDudeController controller = new ClassicBlockDudeController(model, view, levels);
+    view.setHelper(controller);
 
     // pre-game instructions
     System.out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n" +

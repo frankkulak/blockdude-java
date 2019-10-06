@@ -7,6 +7,17 @@ public enum GamePiece {
   BLOCK, DOOR, EMPTY, PLAYER_LEFT, PLAYER_RIGHT, PLAYER_DOOR, WALL;
 
   /**
+   * Returns whether the given game piece is a player.
+   *
+   * @param gp game piece to check
+   * @return true if game piece is a player, false otherwise
+   */
+  public static boolean isPlayer(GamePiece gp) {
+    GamePiece[] playerPieces = {PLAYER_LEFT, PLAYER_RIGHT, PLAYER_DOOR};
+    return contains(playerPieces, gp);
+  }
+
+  /**
    * Determines and returns whether the given GamePiece is solid. Solid GamePieces cannot be entered
    * by the player, and they can also
    *
@@ -25,8 +36,8 @@ public enum GamePiece {
    * @return true if given GamePiece can be entered, false if it cannot be
    */
   public static boolean canEnter(GamePiece gp) {
-    GamePiece[] solidPieces = {DOOR, EMPTY};
-    return contains(solidPieces, gp);
+    GamePiece[] enterablePieces = {DOOR, EMPTY};
+    return contains(enterablePieces, gp);
   }
 
   /**
@@ -36,8 +47,8 @@ public enum GamePiece {
    * @return true if given GamePiece can be picked up, false if it cannot be
    */
   public static boolean canPickUp(GamePiece gp) {
-    GamePiece[] solidPieces = {BLOCK};
-    return contains(solidPieces, gp);
+    GamePiece[] piecesThatCanBePickedUp = {BLOCK};
+    return contains(piecesThatCanBePickedUp, gp);
   }
 
   /**

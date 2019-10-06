@@ -14,4 +14,11 @@ public interface BlockDudeView extends BlockDudeControllerListener {
    * @throws IllegalStateException if model cannot be rendered
    */
   void render(BlockDudeModel model) throws IllegalStateException;
+
+  /**
+   * Sets the helper for this view.
+   *
+   * @param helper helper for this view
+   */
+  void setHelper(BlockDudeViewHelper helper);
 }
