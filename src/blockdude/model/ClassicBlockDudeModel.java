@@ -56,6 +56,8 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   public void restartLevel() throws IllegalStateException {
     requireLevel();
     playerPosition = level.playerPosition();
+    player = level.generatePlayer();
+    heldPiece = null;
     layout = level.layout();
   }
 
@@ -152,6 +154,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
     requireLevel();
 
     try {
+      // check if player is even holding anything
+      if (!playerIsHoldingSomething()) throw new IllegalStateException();
+
       // finding piece at side of player
       int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
       int targetCol = playerPosition.x + colDif;
@@ -167,7 +172,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
       } else {
         // move down until piece hits a solid block
         GamePiece pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
-        while (GamePiece.isSolid(pieceBelow)) {
+        while (!GamePiece.isSolid(pieceBelow)) {
           targetRow++;
           pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
         }
