@@ -3,91 +3,77 @@ package blockdude.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import blockdude.model.gamepieces.GamePiece;
-import blockdude.model.gamepieces.Player;
-import blockdude.util.Position;
-
 /**
- * Represents a level of the BlockDude puzzle game.
+ * Represents a level of the Block Dude puzzle game.
  */
 public class Level {
-  // info regarding level itself
-  private final int id;
   private final String password;
-  private final List<List<GamePiece>> initLayout;
-  // info regarding initial conditions of player
-  private final boolean playerInitFacingLeft;
-  private final Position playerInitPosn;
+  private final List<List<GamePiece>> layout;
+  private final boolean playerFacingLeft;
+  private final Position playerPosition;
 
-  // fixme make const ensure legitimacy of level
   /**
-   * Constructs a new Level object. IMPORTANT: Just because a Level is successfully constructed by
-   * this constructor does not mean it is a valid and playable level, it is possible that a result
-   * of this constructor may cause issues when played, such as a level that is created where the
-   * player is allowed to wander off screen.
+   * Constructs a new Level.
    *
-   * @param id id of this level
-   * @param p password for this level
-   * @param il initial arrangement of all game piece in this level
-   * @throws IllegalArgumentException if there is no player included in the level layout, or if any
-   *                                  given arguments are invalid (id is negative, pass is empty or
-   *                                  null, list is null)
+   * @param password         password of this level
+   * @param layout           layout of this level
+   * @param playerFacingLeft whether player is initially facing left or not
+   * @param playerPosition   where player is initially located
+   * @throws IllegalArgumentException if password is null or empty, if layout is empty or
+   *                                  non-square, or if there is no player at the specified
+   *                                  position
    */
-  private Level(int id, String p, List<List<GamePiece>> il) throws IllegalArgumentException {
-    if (id < 0) {
-      throw new IllegalArgumentException("Level id must be non-negative.");
-    } else if (p == null || p.isEmpty()) {
-      throw new IllegalArgumentException("Level password must have at least one char.");
-    } else if (il == null) {
-      throw new IllegalArgumentException("Level layout must be non-null.");
-    }
+  private Level(String password,
+                List<List<GamePiece>> layout,
+                boolean playerFacingLeft,
+                Position playerPosition)
+          throws IllegalArgumentException {
+    // validating password
+    if (password == null || password.isEmpty())
+      throw new IllegalArgumentException("Password must be >= 1 character.");
 
-    this.id = id;
-    this.password = p;
-    this.initLayout = il;
+    // validating layout
+    if (layout == null || layout.isEmpty())
+      throw new IllegalArgumentException("Layout must have at least one row.");
+    for (List<GamePiece> row : layout)
+      if (row.size() != layout.size()) throw new IllegalArgumentException("Layout must be square.");
 
-    // finding player fixme O(m•n)... can do better? sorry I know this code is really ugly lol
-    Player player = null;
-    Position posn = new Position(0, 0);
-    ROWS : for (int y = 0; y < this.initLayout.size(); y++) {
-      List<GamePiece> row = this.initLayout.get(y);
-      for (int x = 0; x < row.size(); x++) {
-        GamePiece gp = row.get(x);
-        if (gp instanceof Player) { // fixme yikes
-          player = (Player) gp; // fixme yikes pt 2
-          posn.x = x;
-          posn.y = y;
-          break ROWS; // fixme yikes 3: the return of yike
-        }
-      }
-    }
+    // validating player position
+    if (playerPosition == null)
+      throw new IllegalArgumentException("Player position cannot be null.");
+    int row = playerPosition.y;
+    int col = playerPosition.x;
+    if (row < 0 || col < 0)
+      throw new IllegalArgumentException("Player position cannot be negative.");
+    if (row >= layout.size() || col >= layout.get(row).size())
+      throw new IllegalArgumentException("Player position out of board bounds.");
+    GamePiece player = layout.get(row).get(col);
+    if (player != GamePiece.PLAYER_RIGHT && player != GamePiece.PLAYER_LEFT)
+      throw new IllegalArgumentException("No player found at player position.");
 
-    if (player == null) {
-      throw new IllegalArgumentException("There must be a player specified in the level.");
-    } else {
-      this.playerInitFacingLeft = player.isFacingLeft();
-      this.playerInitPosn = posn;
-    }
+    // level is valid
+    this.password = password;
+    this.layout = layout;
+    this.playerFacingLeft = playerFacingLeft;
+    this.playerPosition = playerPosition;
   }
 
   /**
-   * Builder for creating a Level object.
+   * Builder for creating a Level.
    */
   public static class Builder {
-    private int id;
     private String password;
-    private final List<List<GamePiece>> initLayout;
+    private List<List<GamePiece>> layout;
+    private boolean playerFacingLeft;
+    private Position playerPosition;
+    private boolean invalidLevelConfiguration;
 
     public Builder() {
-      // all of these will cause const to throw IAE if not changed to something valid
-      this.id = -1;
-      this.password = "";
-      this.initLayout = new ArrayList<>();
-    }
-
-    public Builder setID(int id) {
-      this.id = id;
-      return this;
+      password = "";
+      layout = new ArrayList<>();
+      playerFacingLeft = false;
+      playerPosition = null;
+      invalidLevelConfiguration = false;
     }
 
     public Builder setPassword(String password) {
@@ -95,20 +81,36 @@ public class Level {
       return this;
     }
 
-    public Builder createNewRow() {
-      this.initLayout.add(new ArrayList<>());
+    public Builder nextRow() {
+      layout.add(new ArrayList<>());
       return this;
     }
 
-    public Builder addToCurrentRow(GamePiece gp) {
-      int finalIndex = this.initLayout.size() - 1;
-      this.initLayout.get(finalIndex).add(gp);
+    public Builder addGamePieceToRow(GamePiece gp) { // fixme make return void
+      List<GamePiece> finalRow = layout.get(layout.size() - 1);
+      finalRow.add(gp);
+
+      switch (gp) {
+        case PLAYER_LEFT:
+        case PLAYER_RIGHT:
+          if (playerPosition != null) invalidLevelConfiguration = true;
+          playerFacingLeft = gp == GamePiece.PLAYER_LEFT;
+          int x = finalRow.size() - 1;
+          int y = layout.size() - 1;
+          playerPosition = new Position(x, y);
+          break;
+        case PLAYER_DOOR:
+          invalidLevelConfiguration = true;
+          break;
+      }
+
       return this;
     }
 
     public Level build() throws IllegalStateException {
       try {
-        return new Level(this.id, this.password, this.initLayout);
+        if (invalidLevelConfiguration) throw new IllegalStateException();
+        return new Level(password, layout, playerFacingLeft, playerPosition);
       } catch (IllegalArgumentException e) {
         throw new IllegalStateException("Could not build Level as specified.");
       }
@@ -116,49 +118,7 @@ public class Level {
   }
 
   /**
-   * Checks if given password is correct for this level, returns result.
-   *
-   * @param password password to try
-   * @return whether or not password was correct
-   */
-  public boolean tryPassword(String password) {
-    if (password == null) {
-      return false;
-    } else {
-      return this.password.equals(password);
-    }
-  }
-
-  /**
-   * Generates and returns new Player object based off of player needed for this level.
-   *
-   * @return new Player object
-   */
-  public Player generatePlayer() {
-    return new Player(this.playerInitFacingLeft);
-  }
-
-  /**
-   * Copies and returns initial position of player in this level.
-   *
-   * @return copy of initial position of player in this level
-   */
-  public Position getPlayerPosn() {
-    // copying values so that internal posn cannot be manipulated when returned
-    return this.playerInitPosn.copy();
-  }
-
-  /**
-   * Finds and returns index of this level.
-   *
-   * @return index of level.
-   */
-  public int index() {
-    return this.id;
-  }
-
-  /**
-   * Finds and returns password of this level.
+   * Returns password of this level.
    *
    * @return password of level
    */
@@ -167,25 +127,44 @@ public class Level {
   }
 
   /**
-   * Returns copy of initial layout of this level.
+   * Checks if given password is correct for this level, returns result.
    *
-   * @return copy of initial layout of this level
+   * @param password password to try
+   * @return true is password is correct, false otherwise
    */
-  public List<List<GamePiece>> getLayout() {
-    List<List<GamePiece>> layout = new ArrayList<>();
+  public boolean tryPassword(String password) {
+    if (password == null) return false;
+    return this.password.equals(password);
+  }
 
-    // copying all rows to layout
-    for (List<GamePiece> row : this.initLayout) {
-      // creating new row to place in layout
-      List<GamePiece> newRow = new ArrayList<>();
-      // adding all game pieces in row to new row
-      for (GamePiece gp : row) {
-        newRow.add(gp.copy());
-      }
-      // adding new row to layout
-      layout.add(newRow);
-    }
+  /**
+   * Returns layout of this level.
+   *
+   * @return layout of this level
+   */
+  public List<List<GamePiece>> layout() {
+    // copying so layout cannot be manipulated externally
+    List<List<GamePiece>> newLayout = new ArrayList<>();
+    for (List<GamePiece> row : layout) newLayout.add(new ArrayList<>(row));
+    return newLayout;
+  }
 
-    return layout;
+  /**
+   * Generates and returns new Player object based off of player needed for this level.
+   *
+   * @return new Player object
+   */
+  public GamePiece generatePlayer() {
+    return (playerFacingLeft ? GamePiece.PLAYER_LEFT : GamePiece.PLAYER_RIGHT);
+  }
+
+  /**
+   * Returns position of player in this level.
+   *
+   * @return position of player in this level
+   */
+  public Position playerPosition() {
+    // copying so player position cannot be manipulated externally
+    return playerPosition.copy();
   }
 }

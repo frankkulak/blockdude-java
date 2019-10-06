@@ -8,12 +8,6 @@ import java.util.regex.Pattern;
 
 import blockdude.model.Level;
 import blockdude.model.LevelSet;
-import blockdude.model.gamepieces.Block;
-import blockdude.model.gamepieces.Door;
-import blockdude.model.gamepieces.Empty;
-import blockdude.model.gamepieces.GamePiece;
-import blockdude.model.gamepieces.Player;
-import blockdude.model.gamepieces.Wall;
 
 /**
  * A class for reading txt files with level data.

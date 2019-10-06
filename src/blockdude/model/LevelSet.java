@@ -1,64 +1,59 @@
 package blockdude.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Represents a set of levels of the BlockDude game which are in a particular order. This set allows
- * for levels to be iterated through in order.
+ * Represents a set of levels of the Block Dude game which are in a particular order.
  */
 public class LevelSet {
-  private final int startingIndex;
   private int curLevelIndex;
   private final List<Level> levels;
+  private final Map<String, Integer> passwords;
 
   /**
-   * Constructs new LevelSet object with given list of levels and starting index.
+   * Constructs new LevelSet with given list of levels and map of passwords to indices.
    *
-   * @param levels list of levels to include in this set
-   * @param startingIndex index to start from
-   * @throws IllegalArgumentException if given set is null or empty or if index isn't in levels
+   * @param levels    list of levels to include in this set
+   * @param passwords map of passwords to level indices
+   * @throws IllegalArgumentException if given set is null or empty
    */
-  private LevelSet(List<Level> levels, int startingIndex) throws IllegalArgumentException {
+  private LevelSet(List<Level> levels, Map<String, Integer> passwords) throws IllegalArgumentException {
     if (levels == null || levels.size() < 1) {
       throw new IllegalArgumentException("Level list must be non-null and have >= 1 level.");
-    } else if (startingIndex >= levels.size() || startingIndex < 0) {
-      throw new IllegalArgumentException("Starting index does not exist in level set.");
     }
 
-    this.startingIndex = startingIndex;
-    this.curLevelIndex = startingIndex;
+    curLevelIndex = 0;
     this.levels = levels;
+    this.passwords = passwords;
   }
 
   /**
-   * Class for building LevelSet objects.
+   * Class for building LevelSets.
    */
   public static class Builder {
-    private int startingIndex;
     private final List<Level> levels;
+    private final Map<String, Integer> passwords;
 
     public Builder() {
-      // const will throw IAE if not added to
-      this.startingIndex = 0;
-      this.levels = new ArrayList<>();
-    }
-
-    public Builder setStartingIndex(int index) {
-      this.startingIndex = index;
-      return this;
+      levels = new ArrayList<>();
+      passwords = new HashMap<>();
     }
 
     public Builder addLevel(Level level) {
-      this.levels.add(level);
+      // make sure levels.size() is called before levels.add(level)
+      passwords.put(level.password(), levels.size());
+      levels.add(level);
       return this;
     }
 
     public LevelSet build() throws IllegalStateException {
       try {
-        return new LevelSet(this.levels, startingIndex);
+        return new LevelSet(levels, passwords);
       } catch (IllegalArgumentException e) {
-        throw new IllegalStateException("Could not build LevelSet as specified.");
+        throw new IllegalStateException("Tried to build LevelSet without adding any levels.");
       }
     }
   }
@@ -69,7 +64,16 @@ public class LevelSet {
    * @return current level
    */
   public Level curLevel() {
-    return this.levels.get(this.curLevelIndex);
+    return levels.get(curLevelIndex);
+  }
+
+  /**
+   * Returns index of current level.
+   *
+   * @return index of current level
+   */
+  public int curLevelIndex() {
+    return curLevelIndex;
   }
 
   /**
@@ -79,22 +83,19 @@ public class LevelSet {
    * @throws IllegalStateException if on that last level / no next level
    */
   public Level nextLevel() throws IllegalStateException {
-    if (this.curLevelIndex == this.levels.size() - 1) {
+    if (curLevelIndex == levels.size() - 1) {
       throw new IllegalStateException("There is no next level.");
     } else {
-      this.curLevelIndex++;
-      return this.levels.get(this.curLevelIndex);
+      curLevelIndex++;
+      return curLevel();
     }
   }
 
   /**
-   * Restarts this level set to be at the first level, then returns the first level.
-   *
-   * @return first level of this level set
+   * Restarts this level set to be at the first level.
    */
-  public Level restart() {
-    this.curLevelIndex = this.startingIndex;
-    return this.curLevel();
+  public void restart() {
+    curLevelIndex = 0;
   }
 
   /**
@@ -105,15 +106,10 @@ public class LevelSet {
    * @throws IllegalArgumentException if no level has given password
    */
   public Level tryPassword(String password) throws IllegalArgumentException {
-    // fixme this is linear time, maybe organize levels better by password in tree?
-    for (int i = 0; i < this.levels.size(); i++) {
-      Level level = this.levels.get(i);
-      if (level.tryPassword(password)) {
-        this.curLevelIndex = i;
-        return level;
-      }
+    if (!passwords.containsKey(password)) {
+      throw new IllegalArgumentException("Level with password '" + password + "' does not exist.");
     }
 
-    throw new IllegalArgumentException("Password \"" + password + "\" is not valid.");
+    return levels.get(passwords.get(password));
   }
 }

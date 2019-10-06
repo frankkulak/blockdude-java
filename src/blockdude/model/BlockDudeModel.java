@@ -2,10 +2,8 @@ package blockdude.model;
 
 import java.util.List;
 
-import blockdude.model.gamepieces.GamePiece;
-
 /**
- * Represents a model for the BlockDude game.
+ * Represents a model for the Block Dude game.
  */
 public interface BlockDudeModel {
   /**
@@ -16,7 +14,7 @@ public interface BlockDudeModel {
   void restartLevel() throws IllegalStateException;
 
   /**
-   * Sets given level to be current level of this model, loads it if successful.
+   * Sets given level to be current level of this model.
    *
    * @param level new level to load
    * @throws IllegalArgumentException if given level is null
@@ -62,14 +60,6 @@ public interface BlockDudeModel {
    * @throws IllegalStateException if no level has been loaded into model yet
    */
   boolean putDown() throws IllegalStateException;
-
-  /**
-   * Finds and returns index of current level.
-   *
-   * @return index of current level.
-   * @throws IllegalStateException if no level has been loaded into model yet
-   */
-  int curLevelIndex() throws IllegalStateException;
 
   /**
    * Finds and returns password for current level.
