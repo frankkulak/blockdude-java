@@ -97,7 +97,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
       case BLOCK:
         return '\u25A2'; // hollow box
       case WALL:
-        return 'X';//'\u2588'; // solid box
+        return '\u2588'; // solid box
       case DOOR:
         return 'Π';
       default:
