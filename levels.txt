@@ -1,8 +1,6 @@
-# BlockDude levels data file
+# Block Dude levels data file
 
--start 0
-
--level 1 tcP
+-level tcP
 X__________________X
 X__________________X
 X__________________X
@@ -11,7 +9,7 @@ XD__X___X_B_X_B_R__X
 XXXXXXXXXXXXXXXXXXXX
 -/level
 
--level 2 ARo
+-level ARo
 _X____XX________XX____
 _X________________X___
 XX_________________X__
@@ -24,7 +22,7 @@ _____X__BX____________
 _____XXXXX____________
 -/level
 
--level 3 CKs
+-level CKs
 _X_________________
 _X___XXXXXXXXXXXXX_
 X_X_X_____________X
@@ -38,7 +36,7 @@ XDX_XXXXXX_XX______
 XXX_XX___XXX_______
 -/level
 
--level 4 daN
+-level daN
 __________________X_____
 _________________X_X____
 _______X________X___X___
@@ -57,7 +55,7 @@ ____X_XXXXXXXXXX________
 ____XXX_________________
 -/level
 
--level 5 BAH
+-level BAH
 _____XXX____XXXXXXXXX_
 _XXXX___XXXX_________X
 X____________________X
@@ -74,7 +72,7 @@ _XXX________X_XXXXXXXX
 ____________XXX_______
 -/level
 
--level 6 Ion
+-level Ion
 _XXX_____________XXXX
 _X__XXXXXXXXXXXXX___X
 XX__________________X
@@ -90,7 +88,7 @@ _____XX_XXX__________
 ______XXX____________
 -/level
 
--level 7 Twe
+-level Twe
 __X___XXXXX___XX___XXX__
 _X_X_X_____X_X__X_X___X_
 _X__XX______XX___XX____X
@@ -107,7 +105,7 @@ __XX_X____XXX___________
 ___XXX__________________
 -/level
 
--level 8 nTy
+-level nTy
 _XXX_______XXXX___XXXXXXX__
 X___X_____X____X_X_______X_
 X____X___X_____XX_________X
@@ -127,7 +125,7 @@ X________B_______B__R__BBBX
 XXXXXXXXXXXXXXXXXXXXXXXXXXX
 -/level
 
--level 9 iRC
+-level iRC
 ________XXX_________
 _______X___X________
 ______X_____X__XXXXX
@@ -147,7 +145,7 @@ ___X_XX_____________
 ___XXX______________
 -/level
 
--level 10 JmK
+-level JmK
 ___XXXXXXXXXXXXXXXXXXXXX___
 _XX___________X_________X__
 XXXXB_______BBXB___BBB_BXX_
@@ -169,7 +167,7 @@ ___XBB__XX_________XX_BBBX_
 ___XXXXXX___________XXXXXX_
 -/level
 
--level 11 wTF
+-level wTF
 XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 X__X___X____________________X
 X_____BXBB____________XXXXX_X

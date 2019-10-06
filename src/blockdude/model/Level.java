@@ -35,8 +35,11 @@ public class Level {
     // validating layout
     if (layout == null || layout.isEmpty())
       throw new IllegalArgumentException("Layout must have at least one row.");
-    for (List<GamePiece> row : layout)
-      if (row.size() != layout.size()) throw new IllegalArgumentException("Layout must be square.");
+    int prevRowSize = layout.get(0).size();
+    for (List<GamePiece> row : layout) {
+      if (row.size() != prevRowSize) throw new IllegalArgumentException("Layout must be square.");
+      prevRowSize = row.size();
+    }
 
     // validating player position
     if (playerPosition == null)
@@ -86,7 +89,7 @@ public class Level {
       return this;
     }
 
-    public Builder addGamePieceToRow(GamePiece gp) { // fixme make return void
+    public Builder addGamePieceToRow(GamePiece gp) {
       List<GamePiece> finalRow = layout.get(layout.size() - 1);
       finalRow.add(gp);
 
@@ -111,7 +114,8 @@ public class Level {
       try {
         if (invalidLevelConfiguration) throw new IllegalStateException();
         return new Level(password, layout, playerFacingLeft, playerPosition);
-      } catch (IllegalArgumentException e) {
+      } catch (IllegalArgumentException | IllegalStateException e) {
+//        throw e;
         throw new IllegalStateException("Could not build Level as specified.");
       }
     }

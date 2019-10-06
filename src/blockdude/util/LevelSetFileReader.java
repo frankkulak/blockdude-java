@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import blockdude.model.GamePiece;
 import blockdude.model.Level;
 import blockdude.model.LevelSet;
 
@@ -47,9 +48,6 @@ public class LevelSetFileReader {
       String next = scan.next();
       if (next.equals("-level")) {
         levelSetBuilder.addLevel(parseLevel(scan));
-      } else if (next.equals("-start")) {
-        requireHasNext(scan);
-        levelSetBuilder.setStartingIndex(Integer.parseInt(scan.next())); // might throw, das ok
       } else {
         throw new IllegalArgumentException("Unexpected token \"" + next + "\" found in file.");
       }
@@ -67,9 +65,7 @@ public class LevelSetFileReader {
   private static Level parseLevel(Scanner scan) {
     Level.Builder levelBuilder = new Level.Builder();
 
-    // setting ID and password
-    requireHasNext(scan);
-    levelBuilder.setID(Integer.parseInt(scan.next())); // might throw, das ok
+    // setting password
     requireHasNext(scan);
     levelBuilder.setPassword(scan.next());
 
@@ -79,10 +75,10 @@ public class LevelSetFileReader {
       if (next.equals("-/level")) {
         break;
       } else {
-        levelBuilder.createNewRow();
+        levelBuilder.nextRow();
         char[] chars = next.toCharArray();
         for (char c : chars) {
-          levelBuilder.addToCurrentRow(parseGamePiece(c));
+          levelBuilder.addGamePieceToRow(parseGamePiece(c));
         }
       }
     }
@@ -112,17 +108,17 @@ public class LevelSetFileReader {
   private static GamePiece parseGamePiece(char c) throws IllegalArgumentException {
     switch (c) {
       case 'X':
-        return new Wall();
+        return GamePiece.WALL;
       case '_':
-        return new Empty();
+        return GamePiece.EMPTY;
       case 'B':
-        return new Block();
+        return GamePiece.BLOCK;
       case 'D':
-        return new Door();
+        return GamePiece.DOOR;
       case 'L':
-        return new Player(true);
+        return GamePiece.PLAYER_LEFT;
       case 'R':
-        return new Player(false);
+        return GamePiece.PLAYER_RIGHT;
       default:
         throw new IllegalArgumentException("Char '" + c + "' cannot be parsed. " +
                 "The only valid chars are: {'X', '_', 'B', 'D', 'L', 'R'}.");

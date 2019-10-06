@@ -1,8 +1,6 @@
 # test levels
 
--start 0
-
--level 1 Tst1
+-level Tst1
 XXXXXXXXXXXXX
 XD__________X
 XX__________X
@@ -10,7 +8,7 @@ XX_____L___BX
 XXXXXXXXXXXXX
 -/level
 
--level 2 Tst2
+-level Tst2
 XXXXXXXXXXXXX
 X___________X
 X_____XB____X
