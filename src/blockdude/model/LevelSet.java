@@ -110,6 +110,7 @@ public class LevelSet {
       throw new IllegalArgumentException("Level with password '" + password + "' does not exist.");
     }
 
-    return levels.get(passwords.get(password));
+    curLevelIndex = passwords.get(password);
+    return curLevel();
   }
 }

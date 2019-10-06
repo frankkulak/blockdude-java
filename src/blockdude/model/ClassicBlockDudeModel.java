@@ -62,7 +62,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public void loadNewLevel(Level level) throws IllegalArgumentException {
+  public void loadLevel(Level level) throws IllegalArgumentException {
     if (level == null) throw new IllegalArgumentException("Cannot load null level into model.");
     this.level = level;
     restartLevel();
@@ -199,12 +199,6 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public String curLevelPassword() throws IllegalStateException {
-    requireLevel();
-    return level.password();
-  }
-
-  @Override
   public List<List<GamePiece>> layout() throws IllegalStateException {
     this.requireLevel();
     return this.layout;
@@ -258,11 +252,12 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
 
       // move player to target location
       GamePiece pieceEnteredByPlayer = getGamePieceAt(newPlayerCol, newPlayerRow);
+      boolean gameWon = false;
       GamePiece pieceToUseForPlayer = player;
       switch (pieceEnteredByPlayer) {
         case DOOR:
           pieceToUseForPlayer = GamePiece.PLAYER_DOOR;
-          listener.gameWon();
+          gameWon = true;
           break;
         case EMPTY:
           break;
@@ -276,6 +271,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
       playerPosition.y = newPlayerRow;
       this.setGamePieceAt(pieceToUseForPlayer, newPlayerCol, newPlayerRow);
       this.setGamePieceAt(GamePiece.EMPTY, playerCol, playerRow);
+
+      // notify listener that game was won
+      if (gameWon) listener.gameWon();
 
       return true;
     } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {

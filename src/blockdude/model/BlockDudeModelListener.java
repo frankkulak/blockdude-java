@@ -5,7 +5,7 @@ package blockdude.model;
  */
 public interface BlockDudeModelListener {
   /**
-   * Notifies listener that the game has been won (the player has reached the door).
+   * Notifies listener that the game has been won (i.e. the player has reached the door).
    */
   void gameWon();
 }

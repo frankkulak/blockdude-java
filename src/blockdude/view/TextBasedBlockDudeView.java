@@ -34,7 +34,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
     StringBuilder outputString = new StringBuilder();
 
     outputString.append("Level ").append(currentLevelIndexString());
-    outputString.append(" (password: ").append(model.curLevelPassword()).append(")\n\n");
+    outputString.append(" (password: ").append(helper.currentLevelPassword()).append(")\n\n");
 
     List<List<GamePiece>> layout = model.layout();
 
@@ -97,7 +97,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
       case BLOCK:
         return '\u25A2'; // hollow box
       case WALL:
-        return '\u2588'; // solid box
+        return 'X';//'\u2588'; // solid box
       case DOOR:
         return 'Π';
       default:
@@ -112,6 +112,6 @@ public class TextBasedBlockDudeView implements BlockDudeView {
    */
   private String currentLevelIndexString() {
     if (helper == null) return "[UNKNOWN]";
-    return Integer.toString(helper.currentLevelIndex());
+    return Integer.toString(helper.currentLevelIndex() + 1);
   }
 }

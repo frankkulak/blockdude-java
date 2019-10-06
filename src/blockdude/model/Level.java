@@ -23,11 +23,8 @@ public class Level {
    *                                  non-square, or if there is no player at the specified
    *                                  position
    */
-  private Level(String password,
-                List<List<GamePiece>> layout,
-                boolean playerFacingLeft,
-                Position playerPosition)
-          throws IllegalArgumentException {
+  private Level(String password, List<List<GamePiece>> layout,
+                boolean playerFacingLeft, Position playerPosition) throws IllegalArgumentException {
     // validating password
     if (password == null || password.isEmpty())
       throw new IllegalArgumentException("Password must be >= 1 character.");
@@ -115,7 +112,6 @@ public class Level {
         if (invalidLevelConfiguration) throw new IllegalStateException();
         return new Level(password, layout, playerFacingLeft, playerPosition);
       } catch (IllegalArgumentException | IllegalStateException e) {
-//        throw e;
         throw new IllegalStateException("Could not build Level as specified.");
       }
     }
@@ -126,7 +122,7 @@ public class Level {
    *
    * @return password of level
    */
-  String password() {
+  public String password() {
     return this.password;
   }
 

@@ -1,7 +1,7 @@
 package blockdude.view;
 
 /**
- * An interface that represents a class that can help get a BlockDudeView info that it needs.
+ * Represents a class that can help get a BlockDudeView the info that it needs.
  */
 public interface BlockDudeViewHelper {
   /**
@@ -10,4 +10,11 @@ public interface BlockDudeViewHelper {
    * @return current level index
    */
   int currentLevelIndex();
+
+  /**
+   * Returns the current level password.
+   *
+   * @return current level password
+   */
+  String currentLevelPassword();
 }

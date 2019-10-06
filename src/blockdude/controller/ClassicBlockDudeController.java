@@ -16,8 +16,8 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   /**
    * Constructs a new ClassicBlockDudeController using given model, view, and set of levels.
    *
-   * @param model model to control
-   * @param view view for output / listener for this controller
+   * @param model  model to control
+   * @param view   view for output / listener for this controller
    * @param levels levels to load into model
    * @throws IllegalArgumentException if given model or level set are null
    */
@@ -27,7 +27,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
       throw new IllegalArgumentException("Model and levels must be non-null.");
     }
 
-    model.loadNewLevel(levels.curLevel());
+    model.loadLevel(levels.curLevel());
     model.setListener(this);
     this.model = model;
     this.levels = levels;
@@ -61,7 +61,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    * @param command string to direct how to change model
    * @return whether or not command was successful
    * @throws IllegalArgumentException if command not valid
-   * @throws IllegalStateException if something goes wrong and program needs to terminate
+   * @throws IllegalStateException    if something goes wrong and program needs to terminate
    */
   private boolean handleCommandHelper(String command) throws IllegalArgumentException, IllegalStateException {
     // fixme I know this is ugly, but commands will be used eventually
@@ -123,12 +123,17 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
     return levels.curLevelIndex();
   }
 
+  @Override
+  public String currentLevelPassword() {
+    return levels.curLevel().password();
+  }
+
   /**
    * Restarts the game from the first level.
    */
   private void restartGame() {
     this.levels.restart();
-    this.model.loadNewLevel(this.levels.curLevel());
+    this.model.loadLevel(this.levels.curLevel());
   }
 
   /**
@@ -147,7 +152,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   private boolean tryLevelPassword(String password) {
     try {
       Level level = this.levels.tryPassword(password);
-      this.model.loadNewLevel(level);
+      this.model.loadLevel(level);
       return true;
     } catch (IllegalArgumentException e) {
       // no level has the given password, return false
@@ -163,7 +168,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   private boolean nextLevel() {
     try {
       Level nextLevel = this.levels.nextLevel();
-      this.model.loadNewLevel(nextLevel);
+      this.model.loadLevel(nextLevel);
       return true;
     } catch (IllegalStateException e) {
       // there is no next level, return false
