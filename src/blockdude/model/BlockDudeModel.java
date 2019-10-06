@@ -62,20 +62,12 @@ public interface BlockDudeModel {
   boolean putDown() throws IllegalStateException;
 
   /**
-   * Returns whether or not the player is holding something or not.
+   * Returns the piece being held by the player, which may be null.
    *
-   * @return true if player holding something, false otherwise
+   * @return piece that the player is holding
    * @throws IllegalStateException if no level has been loaded into model yet
    */
-  boolean playerIsHoldingSomething() throws IllegalStateException;
-
-//  /**
-//   * Finds and returns password for current level.
-//   *
-//   * @return password for current level
-//   * @throws IllegalStateException if no level has been loaded into model yet
-//   */
-//  String currentLevelPassword() throws IllegalStateException;
+  GamePiece pieceHeldByPlayer() throws IllegalStateException;
 
   /**
    * Returns current layout of this model.

@@ -48,8 +48,8 @@ public class TextBasedBlockDudeView implements BlockDudeView {
         // check if on last row, if not, then check if player is below and has block
         if (i != layout.size() - 1) {
           GamePiece pieceBelow = layout.get(i + 1).get(j);
-          if (GamePiece.isPlayer(pieceBelow) && model.playerIsHoldingSomething()) {
-            outputString.append(charFor(GamePiece.BLOCK));
+          if (GamePiece.isPlayer(pieceBelow) && (model.pieceHeldByPlayer() != null)) {
+            outputString.append(charFor(model.pieceHeldByPlayer()));
           } else {
             outputString.append(charFor(layout.get(i).get(j)));
           }

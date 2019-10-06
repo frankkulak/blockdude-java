@@ -155,7 +155,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
 
     try {
       // check if player is even holding anything
-      if (!playerIsHoldingSomething()) throw new IllegalStateException();
+      if (heldPiece == null) throw new IllegalStateException();
 
       // finding piece at side of player
       int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
@@ -193,9 +193,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public boolean playerIsHoldingSomething() throws IllegalStateException {
+  public GamePiece pieceHeldByPlayer() throws IllegalStateException {
     requireLevel();
-    return heldPiece != null;
+    return heldPiece;
   }
 
   @Override
