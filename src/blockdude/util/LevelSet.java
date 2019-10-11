@@ -21,26 +21,25 @@ public class LevelSet {
    * @throws IllegalArgumentException if given set is null or empty
    */
   private LevelSet(List<Level> levels, Map<String, Integer> passwords) throws IllegalArgumentException {
-    if (levels == null || levels.size() < 1) {
+    if (levels == null || levels.size() == 0)
       throw new IllegalArgumentException("Level list must be non-null and have >= 1 level.");
-    }
-
     currentLevelIndex = 0;
     this.levels = levels;
     this.passwords = passwords;
   }
 
   /**
-   * Class for building LevelSets.
+   * Class for building LevelSets. Access is package private since LevelSets should only ever be
+   * created by a LevelSetFileReader.
    */
-  public static class Builder {
+  static class Builder {
     private final List<Level> levels;
     private final Map<String, Integer> passwords;
 
     /**
      * Constructs a new LevelSet.Builder.
      */
-    public Builder() {
+    Builder() {
       levels = new ArrayList<>();
       passwords = new HashMap<>();
     }
@@ -50,7 +49,7 @@ public class LevelSet {
      *
      * @param level level to add to this builder
      */
-    public void addLevel(Level level) {
+    void addLevel(Level level) {
       // make sure levels.size() is called before levels.add(level), or else off by 1 error
       passwords.put(level.password(), levels.size());
       levels.add(level);
@@ -62,7 +61,7 @@ public class LevelSet {
      * @return a new LevelSet with the levels added to this builder
      * @throws IllegalStateException if no levels have been added to this builder
      */
-    public LevelSet build() throws IllegalStateException {
+    LevelSet build() throws IllegalStateException {
       try {
         return new LevelSet(levels, passwords);
       } catch (IllegalArgumentException e) {
@@ -96,12 +95,10 @@ public class LevelSet {
    * @throws IllegalStateException if on that last level / no next level
    */
   public Level nextLevel() throws IllegalStateException {
-    if (currentLevelIndex == levels.size() - 1) {
+    if (currentLevelIndex == levels.size() - 1)
       throw new IllegalStateException("There is no next level.");
-    } else {
-      currentLevelIndex++;
-      return currentLevel();
-    }
+    currentLevelIndex++;
+    return currentLevel();
   }
 
   /**
@@ -119,10 +116,8 @@ public class LevelSet {
    * @throws IllegalArgumentException if no level has given password
    */
   public Level tryPassword(String password) throws IllegalArgumentException {
-    if (!passwords.containsKey(password)) {
+    if (!passwords.containsKey(password))
       throw new IllegalArgumentException("Level with password '" + password + "' does not exist.");
-    }
-
     currentLevelIndex = passwords.get(password);
     return currentLevel();
   }
