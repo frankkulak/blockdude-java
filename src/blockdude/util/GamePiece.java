@@ -1,4 +1,4 @@
-package blockdude.model;
+package blockdude.util;
 
 /**
  * Represents game pieces in the Block Dude game.

@@ -2,6 +2,10 @@ package blockdude.model;
 
 import java.util.List;
 
+import blockdude.util.GamePiece;
+import blockdude.util.Level;
+import blockdude.util.Position;
+
 // FIXME: POTENTIAL ISSUES WITH THIS MODEL
 //        1) It is possible to move left, right, and up while holding a block, even if there is a
 //           solid game piece directly above the player. This means that the block the player is

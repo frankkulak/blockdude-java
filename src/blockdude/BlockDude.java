@@ -8,7 +8,7 @@ import blockdude.controller.BlockDudeController;
 import blockdude.controller.ClassicBlockDudeController;
 import blockdude.model.BlockDudeModel;
 import blockdude.model.ClassicBlockDudeModel;
-import blockdude.model.LevelSet;
+import blockdude.util.LevelSet;
 import blockdude.util.LevelSetFileReader;
 import blockdude.view.BlockDudeView;
 import blockdude.view.TextBasedBlockDudeView;
@@ -98,24 +98,19 @@ public class BlockDude {
   private static BlockDudeConfigurations parseArgs(String[] args) throws IllegalArgumentException {
     BlockDudeConfigurations config = new BlockDudeConfigurations();
 
-    for (int argIndex = 0; argIndex < args.length; argIndex++) {
+    int argIndex = 0;
+    while (argIndex < args.length) {
       String arg = args[argIndex];
 
       switch (arg) {
         case "-source":
-          if (argIndex == args.length - 1)
-            throw new IllegalArgumentException("Expected token to follow \"" + arg + "\".");
-          argIndex++;
-          config.levels = parseLevelSet(args[argIndex]);
+          argIndex = parseSource(args, argIndex, config);
           break;
         case "-view":
-          if (argIndex == args.length - 1)
-            throw new IllegalArgumentException("Expected token to follow \"" + arg + "\".");
-          argIndex++;
-          config.view = parseView(args[argIndex]);
+          argIndex = parseView(args, argIndex, config);
           break;
         default:
-          throw new IllegalArgumentException("Unexpected token found: \"" + arg + "\".");
+          throw new IllegalArgumentException("Unexpected token ('" + arg + "') found.");
       }
     }
 
@@ -127,29 +122,61 @@ public class BlockDude {
   }
 
   /**
-   * Parses a view from the specified view name.
+   * Parses a view from the current index in the given list of arguments.
    *
-   * @param viewName name of view to return
-   * @return view generated from given string
-   * @throws IllegalArgumentException if no view can be parsed from the given string
+   * @param args   array of arguments / tokens
+   * @param index  index of '-source' token
+   * @param config game configurations to modify
+   * @return index immediately after all '-source' arguments
+   * @throws IllegalArgumentException if a source could not be parsed from the given arguments
    */
-  private static BlockDudeView parseView(String viewName) throws IllegalArgumentException {
-    BlockDudeView view = views.get(viewName);
-    if (view == null)
-      throw new IllegalArgumentException("View named \"" + viewName + "\" could not be parsed.");
-    return view;
+  private static int parseSource(String[] args, int index, BlockDudeConfigurations config)
+          throws IllegalArgumentException {
+    requireHasMoreTokens(args, index, 1);
+    index++;
+    String filename = args[index];
+    // will throw IAE if no level with given file name exists
+    // fixme - handle more exceptions, clean up levelset for this
+    config.levels = LevelSetFileReader.parseLevelSetFile(filename);
+    return index + 1;
   }
 
   /**
-   * Returns a level set parsed from the given file name.
+   * Parses a view from the current index in the given list of arguments.
    *
-   * @param filename name of file to generate level set from
-   * @return level set parsed from file with given name
-   * @throws IllegalArgumentException if a file with the given name does not exist, or if it does
-   *                                  exist but cannot be parsed as a level set fixme catch more exceptions
+   * @param args   array of arguments / tokens
+   * @param index  index of '-view' token
+   * @param config game configurations to modify
+   * @return index immediately after all '-view' arguments
+   * @throws IllegalArgumentException if a view could not be parsed from the given arguments
    */
-  private static LevelSet parseLevelSet(String filename) throws IllegalArgumentException {
-    // will throw IAE if no level with given file name exists
-    return LevelSetFileReader.parseLevelSetFile(filename);
+  private static int parseView(String[] args, int index, BlockDudeConfigurations config)
+          throws IllegalArgumentException {
+    requireHasMoreTokens(args, index, 1);
+    index++;
+    String viewName = args[index];
+    BlockDudeView view = views.get(viewName);
+    if (view == null)
+      throw new IllegalArgumentException("Token '" + viewName + "' could not be parsed as a view.");
+    config.view = view;
+    index++;
+    return index;
+  }
+
+  /**
+   * Throws a detailed IllegalArgumentException if there are not at least the specified number of
+   * tokens required following the current token.
+   *
+   * @param args           array of arguments / tokens
+   * @param index          index of current argument / token
+   * @param tokensRequired tokens required after the current one
+   * @throws IllegalArgumentException if there are not enough tokens in the given array
+   */
+  private static void requireHasMoreTokens(String[] args, int index, int tokensRequired)
+          throws IllegalArgumentException {
+    int argsLeft = args.length - index - 1;
+    String lastToken = args[index];
+    if (argsLeft < tokensRequired) throw new IllegalArgumentException("Expected '" + lastToken +
+            "' to be followed by " + tokensRequired + " token(s), but found " + argsLeft + ".");
   }
 }

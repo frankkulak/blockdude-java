@@ -2,8 +2,8 @@ package blockdude.controller;
 
 import blockdude.model.BlockDudeModel;
 import blockdude.model.BlockDudeModelListener;
-import blockdude.model.Level;
-import blockdude.model.LevelSet;
+import blockdude.util.Level;
+import blockdude.util.LevelSet;
 import blockdude.view.BlockDudeView;
 
 /**
@@ -27,6 +27,8 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
     if (model == null || levels == null) {
       throw new IllegalArgumentException("Model and levels must be non-null.");
     }
+
+    // fixme - make require view and model, run by passing levels
 
     model.loadLevel(levels.currentLevel());
     model.setListener(this);

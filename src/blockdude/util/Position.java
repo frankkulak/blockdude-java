@@ -1,10 +1,10 @@
-package blockdude.model;
+package blockdude.util;
 
 /**
  * Represents a 2D position in a plane with X and Y coordinates.
  */
-final class Position {
-  int x, y;
+public final class Position {
+  public int x, y;
 
   /**
    * Constructs a new Position object using given x and y values.
@@ -12,7 +12,7 @@ final class Position {
    * @param x x coordinate of position
    * @param y y coordinate of position
    */
-  Position(int x, int y) {
+  public Position(int x, int y) {
     this.x = x;
     this.y = y;
   }
@@ -22,7 +22,7 @@ final class Position {
    *
    * @return new Position object with current x and y values
    */
-  Position copy() {
+  public Position copy() {
     return new Position(x, y);
   }
 }

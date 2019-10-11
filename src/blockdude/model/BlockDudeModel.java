@@ -2,6 +2,9 @@ package blockdude.model;
 
 import java.util.List;
 
+import blockdude.util.GamePiece;
+import blockdude.util.Level;
+
 /**
  * Represents a model for the Block Dude game.
  */

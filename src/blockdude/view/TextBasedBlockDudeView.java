@@ -4,7 +4,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import blockdude.model.BlockDudeModel;
-import blockdude.model.GamePiece;
+import blockdude.util.GamePiece;
 
 /**
  * Represents a simple text-based view for the BlockDude game. Intended for use with the console.
@@ -96,6 +96,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
   private char charFor(GamePiece gp) throws IllegalArgumentException {
     switch (gp) {
       case EMPTY:
+        // return '\u00B7'; // middle dot
         return ' ';
       case PLAYER_LEFT:
         return '<';

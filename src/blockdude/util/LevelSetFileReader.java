@@ -6,10 +6,6 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import blockdude.model.GamePiece;
-import blockdude.model.Level;
-import blockdude.model.LevelSet;
-
 /**
  * A class for reading txt files with level data.
  */
