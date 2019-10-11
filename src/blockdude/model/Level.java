@@ -123,18 +123,7 @@ public class Level {
    * @return password of level
    */
   public String password() {
-    return this.password;
-  }
-
-  /**
-   * Checks if given password is correct for this level, returns result.
-   *
-   * @param password password to try
-   * @return true is password is correct, false otherwise
-   */
-  public boolean tryPassword(String password) {
-    if (password == null) return false;
-    return this.password.equals(password);
+    return password;
   }
 
   /**
@@ -144,9 +133,9 @@ public class Level {
    */
   public List<List<GamePiece>> layout() {
     // copying so layout cannot be manipulated externally
-    List<List<GamePiece>> newLayout = new ArrayList<>();
-    for (List<GamePiece> row : layout) newLayout.add(new ArrayList<>(row));
-    return newLayout;
+    List<List<GamePiece>> layoutCopy = new ArrayList<>();
+    for (List<GamePiece> row : layout) layoutCopy.add(new ArrayList<>(row));
+    return layoutCopy;
   }
 
   /**

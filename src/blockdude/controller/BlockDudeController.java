@@ -32,4 +32,11 @@ public interface BlockDudeController extends BlockDudeViewHelper {
    * @param listener listener to add to this controller
    */
   void setListener(BlockDudeControllerListener listener);
+
+  /**
+   * TODO
+   *
+   * @throws RuntimeException todo
+   */
+  void start() throws RuntimeException;
 }

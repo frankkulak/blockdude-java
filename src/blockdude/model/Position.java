@@ -23,6 +23,6 @@ final class Position {
    * @return new Position object with current x and y values
    */
   Position copy() {
-    return new Position(this.x, this.y);
+    return new Position(x, y);
   }
 }

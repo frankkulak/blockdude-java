@@ -8,12 +8,12 @@ import blockdude.model.BlockDudeModel;
  */
 public interface BlockDudeView extends BlockDudeControllerListener {
   /**
-   * Renders given BlockDudeModel using this view.
+   * Refreshes this view to display the current state of the given model.
    *
-   * @param model model to render
+   * @param model model to refresh
    * @throws IllegalStateException if model cannot be rendered
    */
-  void render(BlockDudeModel model) throws IllegalStateException;
+  void refresh(BlockDudeModel model) throws IllegalStateException; // fixme change to take in layout & level info
 
   /**
    * Sets the helper for this view.

@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents a set of levels of the Block Dude game which are in a particular order.
+ * Represents a set of levels of the Block Dude game.
  */
 public class LevelSet {
-  private int curLevelIndex;
+  private int currentLevelIndex;
   private final List<Level> levels;
   private final Map<String, Integer> passwords;
 
@@ -25,7 +25,7 @@ public class LevelSet {
       throw new IllegalArgumentException("Level list must be non-null and have >= 1 level.");
     }
 
-    curLevelIndex = 0;
+    currentLevelIndex = 0;
     this.levels = levels;
     this.passwords = passwords;
   }
@@ -37,18 +37,31 @@ public class LevelSet {
     private final List<Level> levels;
     private final Map<String, Integer> passwords;
 
+    /**
+     * Constructs a new LevelSet.Builder.
+     */
     public Builder() {
       levels = new ArrayList<>();
       passwords = new HashMap<>();
     }
 
-    public Builder addLevel(Level level) {
-      // make sure levels.size() is called before levels.add(level)
+    /**
+     * Adds a level to this builder and registers its password.
+     *
+     * @param level level to add to this builder
+     */
+    public void addLevel(Level level) {
+      // make sure levels.size() is called before levels.add(level), or else off by 1 error
       passwords.put(level.password(), levels.size());
       levels.add(level);
-      return this;
     }
 
+    /**
+     * Builds a LevelSet using the levels added to this builder.
+     *
+     * @return a new LevelSet with the levels added to this builder
+     * @throws IllegalStateException if no levels have been added to this builder
+     */
     public LevelSet build() throws IllegalStateException {
       try {
         return new LevelSet(levels, passwords);
@@ -63,8 +76,8 @@ public class LevelSet {
    *
    * @return current level
    */
-  public Level curLevel() {
-    return levels.get(curLevelIndex);
+  public Level currentLevel() {
+    return levels.get(currentLevelIndex);
   }
 
   /**
@@ -72,8 +85,8 @@ public class LevelSet {
    *
    * @return index of current level
    */
-  public int curLevelIndex() {
-    return curLevelIndex;
+  public int currentLevelIndex() {
+    return currentLevelIndex;
   }
 
   /**
@@ -83,11 +96,11 @@ public class LevelSet {
    * @throws IllegalStateException if on that last level / no next level
    */
   public Level nextLevel() throws IllegalStateException {
-    if (curLevelIndex == levels.size() - 1) {
+    if (currentLevelIndex == levels.size() - 1) {
       throw new IllegalStateException("There is no next level.");
     } else {
-      curLevelIndex++;
-      return curLevel();
+      currentLevelIndex++;
+      return currentLevel();
     }
   }
 
@@ -95,7 +108,7 @@ public class LevelSet {
    * Restarts this level set to be at the first level.
    */
   public void restart() {
-    curLevelIndex = 0;
+    currentLevelIndex = 0;
   }
 
   /**
@@ -110,7 +123,7 @@ public class LevelSet {
       throw new IllegalArgumentException("Level with password '" + password + "' does not exist.");
     }
 
-    curLevelIndex = passwords.get(password);
-    return curLevel();
+    currentLevelIndex = passwords.get(password);
+    return currentLevel();
   }
 }

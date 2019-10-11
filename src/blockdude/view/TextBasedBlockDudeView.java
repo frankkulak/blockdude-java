@@ -12,6 +12,7 @@ import blockdude.model.GamePiece;
 public class TextBasedBlockDudeView implements BlockDudeView {
   private PrintStream out;
   private BlockDudeViewHelper helper;
+  private boolean hasRendered;
 
   /**
    * Constructs new TextBasedBlockDudeView that outputs to given PrintStream.
@@ -25,10 +26,18 @@ public class TextBasedBlockDudeView implements BlockDudeView {
     }
 
     this.out = out;
+    hasRendered = false;
   }
 
   @Override
-  public void render(BlockDudeModel model) throws IllegalStateException {
+  public void refresh(BlockDudeModel model) throws IllegalStateException {
+    if (!hasRendered) {
+      System.out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n- " +
+              "W = move up\n- S = put block down, pick block up\n- /pass: = try password (after :" +
+              ")\n- /rel = restart level\n- /reg = restart game\n- /quit = end game\n\n");
+      hasRendered = true;
+    }
+
     // fixme the way a player holding a block is rendered physically pains me
     // fixme this method is so ugly i am so sorry to whoever is reading this
     StringBuilder outputString = new StringBuilder();
@@ -74,7 +83,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
 
   @Override
   public void modelUpdated(BlockDudeModel model) {
-    this.render(model);
+    this.refresh(model);
   }
 
   /**

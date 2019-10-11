@@ -4,6 +4,7 @@ import blockdude.model.BlockDudeModel;
 import blockdude.model.BlockDudeModelListener;
 import blockdude.model.Level;
 import blockdude.model.LevelSet;
+import blockdude.view.BlockDudeView;
 
 /**
  * Represents a generic controller for the classic BlockDude game.
@@ -27,11 +28,12 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
       throw new IllegalArgumentException("Model and levels must be non-null.");
     }
 
-    model.loadLevel(levels.curLevel());
+    model.loadLevel(levels.currentLevel());
     model.setListener(this);
     this.model = model;
     this.levels = levels;
-    this.setListener(view);
+    setListener(view);
+    ((BlockDudeView) view).setHelper(this);
   }
 
   /**
@@ -53,6 +55,11 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
     } else {
       return false;
     }
+  }
+
+  @Override
+  public void start() throws RuntimeException {
+    // todo impl
   }
 
   /**
@@ -120,12 +127,12 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
 
   @Override
   public int currentLevelIndex() {
-    return levels.curLevelIndex();
+    return levels.currentLevelIndex();
   }
 
   @Override
   public String currentLevelPassword() {
-    return levels.curLevel().password();
+    return levels.currentLevel().password();
   }
 
   /**
@@ -133,7 +140,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    */
   private void restartGame() {
     this.levels.restart();
-    this.model.loadLevel(this.levels.curLevel());
+    this.model.loadLevel(this.levels.currentLevel());
   }
 
   /**
