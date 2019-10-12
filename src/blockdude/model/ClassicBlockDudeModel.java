@@ -60,7 +60,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   public void restartLevel() throws IllegalStateException {
     requireLevel();
     playerPosition = level.playerPosition();
-    player = level.generatePlayer();
+    player = level.player();
     heldPiece = null;
     layout = level.layout();
   }

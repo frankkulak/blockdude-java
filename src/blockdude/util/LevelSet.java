@@ -35,6 +35,8 @@ public class LevelSet {
   static class Builder {
     private final List<Level> levels;
     private final Map<String, Integer> passwords;
+    private boolean invalidConfiguration;
+    private String errorMessage;
 
     /**
      * Constructs a new LevelSet.Builder.
@@ -42,6 +44,8 @@ public class LevelSet {
     Builder() {
       levels = new ArrayList<>();
       passwords = new HashMap<>();
+      invalidConfiguration = false;
+      errorMessage = "";
     }
 
     /**
@@ -50,6 +54,12 @@ public class LevelSet {
      * @param level level to add to this builder
      */
     void addLevel(Level level) {
+      String password = level.password();
+      if (passwords.get(password) != null) {
+        invalidConfiguration = true;
+        errorMessage += "More than one level has the password '" + password + "';";
+      }
+
       // make sure levels.size() is called before levels.add(level), or else off by 1 error
       passwords.put(level.password(), levels.size());
       levels.add(level);
@@ -59,13 +69,15 @@ public class LevelSet {
      * Builds a LevelSet using the levels added to this builder.
      *
      * @return a new LevelSet with the levels added to this builder
-     * @throws IllegalStateException if no levels have been added to this builder
+     * @throws IllegalStateException if cannot build level set as specified
      */
     LevelSet build() throws IllegalStateException {
       try {
+        if (invalidConfiguration) throw new IllegalStateException();
         return new LevelSet(levels, passwords);
-      } catch (IllegalArgumentException e) {
-        throw new IllegalStateException("Tried to build LevelSet without adding any levels.");
+      } catch (IllegalArgumentException | IllegalStateException e) {
+        if (e.getMessage() != null) errorMessage += e.getMessage();
+        throw new IllegalStateException("Could not build LevelSet as specified: " + errorMessage);
       }
     }
   }

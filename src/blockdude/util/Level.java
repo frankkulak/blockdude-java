@@ -9,110 +9,131 @@ import java.util.List;
 public class Level {
   private final String password;
   private final List<List<GamePiece>> layout;
-  private final boolean playerFacingLeft;
+  private final GamePiece player;
   private final Position playerPosition;
 
   /**
    * Constructs a new Level.
    *
-   * @param password         password of this level
-   * @param layout           layout of this level
-   * @param playerFacingLeft whether player is initially facing left or not
-   * @param playerPosition   where player is initially located
-   * @throws IllegalArgumentException if password is null or empty, if layout is empty or
-   *                                  non-square, or if there is no player at the specified
-   *                                  position
+   * @param password       password of this level
+   * @param layout         layout of this level
+   * @param player         player to use at start of level
+   * @param playerPosition where player is initially located
+   * @throws IllegalArgumentException if password is null or empty, if layout is null or empty, if
+   *                                  layout is not rectangular, if player is null or if
+   *                                  playerPosition is null
    */
   private Level(String password, List<List<GamePiece>> layout,
-                boolean playerFacingLeft, Position playerPosition) throws IllegalArgumentException {
-    // validating password
+                GamePiece player, Position playerPosition) throws IllegalArgumentException {
+    // validating password exists and is not empty
     if (password == null || password.isEmpty())
       throw new IllegalArgumentException("Password must be >= 1 character.");
 
-    // validating layout
+    // validating layout exists and is not empty
     if (layout == null || layout.isEmpty())
       throw new IllegalArgumentException("Layout must have at least one row.");
+
+    // validating that layout is a rectangle
     int prevRowSize = layout.get(0).size();
     for (List<GamePiece> row : layout) {
-      if (row.size() != prevRowSize) throw new IllegalArgumentException("Layout must be square.");
+      if (row.size() != prevRowSize)
+        throw new IllegalArgumentException("Layout must be rectangular.");
       prevRowSize = row.size();
     }
 
-    // validating player position
-    if (playerPosition == null)
-      throw new IllegalArgumentException("Player position cannot be null.");
-    int row = playerPosition.y;
-    int col = playerPosition.x;
-    if (row < 0 || col < 0)
-      throw new IllegalArgumentException("Player position cannot be negative.");
-    if (row >= layout.size() || col >= layout.get(row).size())
-      throw new IllegalArgumentException("Player position out of board bounds.");
-    GamePiece player = layout.get(row).get(col);
-    if (player != GamePiece.PLAYER_RIGHT && player != GamePiece.PLAYER_LEFT)
-      throw new IllegalArgumentException("No player found at player position.");
+    // validating player and player position are not null
+    if (player == null || playerPosition == null)
+      throw new IllegalArgumentException("Player and its position cannot be null.");
 
-    // level is valid
+    // the invalid game states of the player position not being correct, having multiple players,
+    // and having players in doors at the start of a level, are all protected by the builder
+
     this.password = password;
     this.layout = layout;
-    this.playerFacingLeft = playerFacingLeft;
+    this.player = player;
     this.playerPosition = playerPosition;
   }
 
   /**
-   * Builder for creating a Level.
+   * Builder for creating a Level. Access is package private since Levels should only ever be
+   * created by a LevelSetFileReader.
    */
-  public static class Builder {
+  static class Builder {
     private String password;
     private List<List<GamePiece>> layout;
-    private boolean playerFacingLeft;
+    private GamePiece player;
     private Position playerPosition;
     private boolean invalidLevelConfiguration;
+    private String errorMessage;
 
-    public Builder() {
+    /**
+     * Creates a new Level.Builder object.
+     */
+    Builder() {
       password = "";
       layout = new ArrayList<>();
-      playerFacingLeft = false;
+      player = null;
       playerPosition = null;
       invalidLevelConfiguration = false;
+      errorMessage = "";
     }
 
-    public Builder setPassword(String password) {
+    /**
+     * Sets the password of this level.
+     *
+     * @param password password of level
+     */
+    void setPassword(String password) {
       this.password = password;
-      return this;
     }
 
-    public Builder nextRow() {
+    /**
+     * Creates a new row in the game board.
+     */
+    void nextRow() {
       layout.add(new ArrayList<>());
-      return this;
     }
 
-    public Builder addGamePieceToRow(GamePiece gp) {
+    /**
+     * Adds the given game piece to the row that is currently being built.
+     *
+     * @param gp game piece to add to row
+     */
+    void addGamePieceToRow(GamePiece gp) {
       List<GamePiece> finalRow = layout.get(layout.size() - 1);
       finalRow.add(gp);
 
-      switch (gp) {
-        case PLAYER_LEFT:
-        case PLAYER_RIGHT:
-          if (playerPosition != null) invalidLevelConfiguration = true;
-          playerFacingLeft = gp == GamePiece.PLAYER_LEFT;
+      if (GamePiece.isPlayer(gp)) {
+        if (player != null) {
+          invalidLevelConfiguration = true;
+          errorMessage += "More than one player specified;";
+        }
+
+        if (gp == GamePiece.PLAYER_DOOR) {
+          invalidLevelConfiguration = true;
+          errorMessage += "Player initially placed in door;";
+        } else {
+          player = gp;
           int x = finalRow.size() - 1;
           int y = layout.size() - 1;
           playerPosition = new Position(x, y);
-          break;
-        case PLAYER_DOOR:
-          invalidLevelConfiguration = true;
-          break;
+        }
       }
-
-      return this;
     }
 
-    public Level build() throws IllegalStateException {
+    /**
+     * Builds a Level using the specified properties.
+     *
+     * @return a new Level with the specified properties.
+     * @throws IllegalStateException if cannot build level as specified
+     */
+    Level build() throws IllegalStateException {
       try {
         if (invalidLevelConfiguration) throw new IllegalStateException();
-        return new Level(password, layout, playerFacingLeft, playerPosition);
+        return new Level(password, layout, player, playerPosition);
       } catch (IllegalArgumentException | IllegalStateException e) {
-        throw new IllegalStateException("Could not build Level as specified.");
+        if (e.getMessage() != null) errorMessage += e.getMessage();
+        throw new IllegalStateException("Could not build Level as specified: " + errorMessage);
       }
     }
   }
@@ -132,19 +153,19 @@ public class Level {
    * @return layout of this level
    */
   public List<List<GamePiece>> layout() {
-    // copying so layout cannot be manipulated externally
+    // copying layout so that it cannot be manipulated externally
     List<List<GamePiece>> layoutCopy = new ArrayList<>();
     for (List<GamePiece> row : layout) layoutCopy.add(new ArrayList<>(row));
     return layoutCopy;
   }
 
   /**
-   * Generates and returns new Player object based off of player needed for this level.
+   * Returns the player to use for this level.
    *
-   * @return new Player object
+   * @return player to use for this level
    */
-  public GamePiece generatePlayer() {
-    return (playerFacingLeft ? GamePiece.PLAYER_LEFT : GamePiece.PLAYER_RIGHT);
+  public GamePiece player() {
+    return player;
   }
 
   /**
