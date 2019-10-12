@@ -18,7 +18,8 @@ public class LevelSetFileReader {
    * @throws IllegalArgumentException if file could not be found
    * @throws IllegalStateException    if file could not be parsed as level set
    */
-  public static LevelSet parseLevelSetFile(String filename) throws IllegalArgumentException {
+  public static LevelSet parseLevelSetFile(String filename)
+          throws IllegalArgumentException, IllegalStateException {
     try {
       return LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
     } catch (FileNotFoundException e) {

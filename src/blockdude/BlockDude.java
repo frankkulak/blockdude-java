@@ -128,15 +128,15 @@ public class BlockDude {
    * @param index  index of '-source' token
    * @param config game configurations to modify
    * @return index immediately after all '-source' arguments
-   * @throws IllegalArgumentException if a source could not be parsed from the given arguments
+   * @throws IllegalArgumentException if the specified source could not be found
+   * @throws IllegalStateException    if the specified source could not be parsed
    */
   private static int parseSource(String[] args, int index, BlockDudeConfigurations config)
-          throws IllegalArgumentException {
+          throws IllegalArgumentException, IllegalStateException {
     requireHasMoreTokens(args, index, 1);
     index++;
-    String filename = args[index];
-    // will throw IAE if no level with given file name exists
-    // fixme - handle more exceptions, clean up levelset for this
+    String filename = "levelSources/" + args[index];
+    // may throw either IAE or ISE - do not catch
     config.levels = LevelSetFileReader.parseLevelSetFile(filename);
     return index + 1;
   }
