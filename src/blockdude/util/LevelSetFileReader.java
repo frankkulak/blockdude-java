@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * A class for reading txt files with level data.
+ * A class for reading text files with level data.
  */
 public class LevelSetFileReader {
   /**
@@ -16,15 +16,14 @@ public class LevelSetFileReader {
    * @param filename name of file to parse
    * @return level set created from input file
    * @throws IllegalArgumentException if file could not be found
+   * @throws IllegalStateException    if file could not be parsed as level set
    */
   public static LevelSet parseLevelSetFile(String filename) throws IllegalArgumentException {
-    FileReader file;
     try {
-      file = new FileReader(filename);
+      return LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("No file named " + filename + " found.");
     }
-    return LevelSetFileReader.parseLevelSetFile(file);
   }
 
   /**
@@ -32,8 +31,9 @@ public class LevelSetFileReader {
    *
    * @param readable txt file to read from
    * @return level set generated from file
+   * @throws IllegalStateException if file could not be parsed as level set
    */
-  private static LevelSet parseLevelSetFile(Readable readable) {
+  private static LevelSet parseLevelSetFile(Readable readable) throws IllegalStateException {
     Objects.requireNonNull(readable, "Must have non-null readable source.");
     Scanner scan = new Scanner(readable);
     scan.useDelimiter(Pattern.compile("(\\p{Space}+|#.*)+"));
@@ -42,13 +42,17 @@ public class LevelSetFileReader {
 
     while (scan.hasNext()) {
       String next = scan.next();
-      if (next.equals("-level")) {
-        levelSetBuilder.addLevel(parseLevel(scan));
-      } else {
-        throw new IllegalArgumentException("Unexpected token \"" + next + "\" found in file.");
+
+      switch (next) {
+        case "-level":
+          levelSetBuilder.addLevel(parseLevel(scan));
+          break;
+        default:
+          throw new IllegalStateException("Unexpected token ('" + next + "') found in file.");
       }
     }
 
+    // building might throw ISE - don't catch it
     return levelSetBuilder.build();
   }
 
@@ -57,28 +61,25 @@ public class LevelSetFileReader {
    *
    * @param scan scanner from which to parse level
    * @return level parsed from scanner
+   * @throws IllegalStateException if could not parse a level
    */
-  private static Level parseLevel(Scanner scan) {
+  private static Level parseLevel(Scanner scan) throws IllegalStateException {
     Level.Builder levelBuilder = new Level.Builder();
 
-    // setting password
+    // might throw ISE - don't catch it
     requireHasNext(scan);
     levelBuilder.setPassword(scan.next());
 
     // creating layout of level
-    while(scan.hasNext()) {
+    while (scan.hasNext()) {
       String next = scan.next();
-      if (next.equals("-/level")) {
-        break;
-      } else {
-        levelBuilder.nextRow();
-        char[] chars = next.toCharArray();
-        for (char c : chars) {
-          levelBuilder.addGamePieceToRow(parseGamePiece(c));
-        }
-      }
+      if (next.equals("-/level")) break;
+      levelBuilder.nextRow();
+      char[] chars = next.toCharArray();
+      for (char c : chars) levelBuilder.addGamePieceToRow(parseGamePiece(c));
     }
 
+    // building might throw ISE - don't catch it
     return levelBuilder.build();
   }
 
@@ -88,10 +89,8 @@ public class LevelSetFileReader {
    * @param scan scanner to check for next token
    * @throws IllegalStateException if no next token found
    */
-  private static void requireHasNext(Scanner scan) throws IllegalArgumentException {
-    if (!scan.hasNext()) {
-      throw new IllegalArgumentException("Expected token, but did not find one.");
-    }
+  private static void requireHasNext(Scanner scan) throws IllegalStateException {
+    if (!scan.hasNext()) throw new IllegalStateException("Expected token, but did not find one.");
   }
 
   /**
@@ -99,9 +98,9 @@ public class LevelSetFileReader {
    *
    * @param c char of game piece to return
    * @return game piece corresponding to given char
-   * @throws IllegalArgumentException if given char is not a valid game piece
+   * @throws IllegalStateException if given char is not a valid game piece
    */
-  private static GamePiece parseGamePiece(char c) throws IllegalArgumentException {
+  private static GamePiece parseGamePiece(char c) throws IllegalStateException {
     switch (c) {
       case 'X':
         return GamePiece.WALL;
@@ -116,7 +115,7 @@ public class LevelSetFileReader {
       case 'R':
         return GamePiece.PLAYER_RIGHT;
       default:
-        throw new IllegalArgumentException("Char '" + c + "' cannot be parsed. " +
+        throw new IllegalStateException("Char '" + c + "' cannot be parsed as GamePiece. " +
                 "The only valid chars are: {'X', '_', 'B', 'D', 'L', 'R'}.");
     }
   }
