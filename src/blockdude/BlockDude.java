@@ -17,6 +17,10 @@ import blockdude.view.TextBasedBlockDudeView;
  * A class for running the Block Dude puzzle game.
  */
 public class BlockDude {
+  // the reason I'm using a map instead of a switch statement in the parseView() method is because
+  // it's easier to read and update - I think it's cleaner to have all the recognized keywords in
+  // one place at the top of the class, and better to simply add to a map than to update the parsing
+  // method every time I create a new view
   private static Map<String, BlockDudeView> views = new HashMap<>();
 
   static {
@@ -26,9 +30,10 @@ public class BlockDude {
 
   /**
    * Main method for running the Block Dude game. Args should be of the structure: {"-source",
-   * FILE_NAME, "-view", VIEW_TYPE} where FILE_NAME is the name of the file from which to read level
-   * data (including the extension) and VIEW_TYPE is the view to use for the game (currently, only
-   * "text" is supported).
+   * FILE_NAME, "-view", VIEW_TYPE} where FILE_NAME is the name of the file (including its .txt
+   * extension) from which to read level data (which must be placed in the levelSources folder) and
+   * VIEW_TYPE is the view to use for the game (currently, the only supported view is "text"). An
+   * example of valid args is: {"-source", "levels.txt", "-view", "text"}.
    *
    * @param args list of game configuration arguments
    */
