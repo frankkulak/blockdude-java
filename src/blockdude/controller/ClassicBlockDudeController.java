@@ -85,11 +85,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
       return this.model.moveUp();
     } else if (command.equalsIgnoreCase("S")) {
       // either put down or pick up
-      if (this.model.putDown()) {
-        return true;
-      } else {
-        return this.model.pickUp();
-      }
+      return this.model.pickUpOrPutDown();
     } else if (command.equalsIgnoreCase("/reg")) {
       // restart game
       this.restartGame();

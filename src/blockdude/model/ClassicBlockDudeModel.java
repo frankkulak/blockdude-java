@@ -118,82 +118,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public boolean pickUp() throws IllegalStateException {
-    requireLevel();
-
-    try {
-      // finding piece to pick up
-      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
-      int pieceCol = playerPosition.x + colDif;
-      int pieceRow = playerPosition.y;
-      GamePiece pieceToSide = getGamePieceAt(pieceCol, pieceRow);
-
-      // make sure the piece is solid
-      if (!GamePiece.isSolid(pieceToSide))
-        throw new IllegalStateException("Cannot pick up piece because it is not solid.");
-
-      // make sure there is nothing on top of piece you're trying to pick up
-      GamePiece aboveTarget = getGamePieceAt(pieceCol, pieceRow - 1);
-      if (GamePiece.isSolid(aboveTarget))
-        throw new IllegalStateException("Cannot pick up piece because it is under another piece.");
-
-      // picking up piece, if possible (adds block to player directly)
-      if (heldPiece != null)
-        throw new IllegalStateException("Cannot pick up block because already holding one.");
-      heldPiece = pieceToSide;
-
-      // picking up piece was successful, so remove from where it was & return true
-      setGamePieceAt(GamePiece.EMPTY, pieceCol, pieceRow);
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // something prevented block from being picked up
-      // - AIOBE = tried to pick something up when player is at board edge
-      // - ISE = player is already holding a block, or there is block on top of one trying to lift
-      return false;
-    }
-  }
-
-  @Override
-  public boolean putDown() throws IllegalStateException {
-    requireLevel();
-
-    try {
-      // check if player is even holding anything
-      if (heldPiece == null) throw new IllegalStateException();
-
-      // finding piece at side of player
-      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
-      int targetCol = playerPosition.x + colDif;
-      int targetRow = playerPosition.y;
-      GamePiece pieceToSide = getGamePieceAt(targetCol, targetRow);
-
-      // check if target place is solid or not
-      if (GamePiece.isSolid(pieceToSide)) {
-        // piece to side is solid, check if can place block above it
-        targetRow--;
-        GamePiece pieceAbovePieceToSide = getGamePieceAt(targetCol, targetRow);
-        if (GamePiece.isSolid(pieceAbovePieceToSide)) return false;
-      } else {
-        // move down until piece hits a solid block
-        GamePiece pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
-        while (!GamePiece.isSolid(pieceBelow)) {
-          targetRow++;
-          pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
-        }
-      }
-
-      // put piece down
-      GamePiece pieceToPutDown = heldPiece;
-      heldPiece = null;
-      setGamePieceAt(pieceToPutDown, targetCol, targetRow);
-
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // something prevented block from being put down
-      // - AIOBE = tried to put block down out of bounds
-      // - ISE = player is not holding a block, or nowhere to put block
-      return false;
-    }
+  public boolean pickUpOrPutDown() throws IllegalStateException {
+    // will throw ISE if there is no level loaded
+    return (heldPiece == null) ? pickUp() : putDown();
   }
 
   @Override
@@ -285,6 +212,92 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
       // player moving in the specified direction - try to at least make the player face the
       // direction and return whether or not the player's direction has changed
       return changePlayerDirection(direction);
+    }
+  }
+
+  /**
+   * Picks up game piece in front of player, if able to do so.
+   *
+   * @return true if picking up changed the state of the board, false otherwise
+   * @throws IllegalStateException if no level has been loaded into model yet
+   */
+  private boolean pickUp() throws IllegalStateException {
+    requireLevel();
+
+    try {
+      // finding piece to pick up
+      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
+      int pieceCol = playerPosition.x + colDif;
+      int pieceRow = playerPosition.y;
+      GamePiece pieceToSide = getGamePieceAt(pieceCol, pieceRow);
+
+      // make sure the piece is solid
+      if (!GamePiece.isSolid(pieceToSide))
+        throw new IllegalStateException("Cannot pick up piece because it is not solid.");
+
+      // make sure there is nothing on top of piece you're trying to pick up
+      GamePiece aboveTarget = getGamePieceAt(pieceCol, pieceRow - 1);
+      if (GamePiece.isSolid(aboveTarget))
+        throw new IllegalStateException("Cannot pick up piece because it is under another piece.");
+
+      // picking up piece, if possible (adds block to player directly)
+      if (heldPiece != null)
+        throw new IllegalStateException("Cannot pick up block because already holding one.");
+      heldPiece = pieceToSide;
+
+      // picking up piece was successful, so remove from where it was & return true
+      setGamePieceAt(GamePiece.EMPTY, pieceCol, pieceRow);
+      return true;
+    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
+      // something prevented block from being picked up
+      // - AIOBE = tried to pick something up when player is at board edge
+      // - ISE = player is already holding a block, or there is block on top of one trying to lift
+      return false;
+    }
+  }
+
+  /**
+   * Puts the game piece that player is holding down in front of player.
+   *
+   * @return true if putting down changed the state of the board, false otherwise
+   * @throws IllegalStateException if no level has been loaded into model yet
+   */
+  private boolean putDown() throws IllegalStateException {
+    requireLevel();
+
+    try {
+      // finding piece at side of player
+      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
+      int targetCol = playerPosition.x + colDif;
+      int targetRow = playerPosition.y;
+      GamePiece pieceToSide = getGamePieceAt(targetCol, targetRow);
+
+      // check if target place is solid or not
+      if (GamePiece.isSolid(pieceToSide)) {
+        // piece to side is solid, check if can place block above it
+        targetRow--;
+        GamePiece pieceAbovePieceToSide = getGamePieceAt(targetCol, targetRow);
+        if (GamePiece.isSolid(pieceAbovePieceToSide)) return false;
+      } else {
+        // move down until piece hits a solid block
+        GamePiece pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
+        while (!GamePiece.isSolid(pieceBelow)) {
+          targetRow++;
+          pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
+        }
+      }
+
+      // put piece down
+      GamePiece pieceToPutDown = heldPiece;
+      heldPiece = null;
+      setGamePieceAt(pieceToPutDown, targetCol, targetRow);
+
+      return true;
+    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
+      // something prevented block from being put down
+      // - AIOBE = tried to put block down out of bounds
+      // - ISE = nowhere to put block
+      return false;
     }
   }
 

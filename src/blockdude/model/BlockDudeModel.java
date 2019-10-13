@@ -49,20 +49,13 @@ public interface BlockDudeModel {
   boolean moveUp() throws IllegalStateException;
 
   /**
-   * Picks up game piece in front of player, if able to do so.
+   * Picks up the block in front of the player if they are not currently holding something,
+   * otherwise puts the block they are currently holding down.
    *
-   * @return true if picking up changed the state of the board, false otherwise
+   * @return true if player picked something up or put something down
    * @throws IllegalStateException if no level has been loaded into model yet
    */
-  boolean pickUp() throws IllegalStateException;
-
-  /**
-   * Puts the game piece that player is holding down in front of player.
-   *
-   * @return true if putting down changed the state of the board, false otherwise
-   * @throws IllegalStateException if no level has been loaded into model yet
-   */
-  boolean putDown() throws IllegalStateException;
+  boolean pickUpOrPutDown() throws IllegalStateException;
 
   /**
    * Returns the piece being held by the player, which may be null.
