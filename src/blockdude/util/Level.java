@@ -149,7 +149,9 @@ public class Level {
    */
   public List<List<GamePiece>> layout() {
     // copying layout so that it cannot be manipulated externally
-    return new ArrayList<>(layout);
+    List<List<GamePiece>> layoutCopy = new ArrayList<>();
+    for (List<GamePiece> row : layout) layoutCopy.add(new ArrayList<>(row));
+    return layoutCopy;
   }
 
   /**
