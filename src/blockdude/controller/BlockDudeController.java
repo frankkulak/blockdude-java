@@ -1,11 +1,9 @@
 package blockdude.controller;
 
-import blockdude.view.BlockDudeViewHelper;
-
 /**
- * Represents a controller for the BlockDude puzzle game.
+ * Represents a controller for the Block Dude game.
  */
-public interface BlockDudeController extends BlockDudeViewHelper {
+public interface BlockDudeController {
   /**
    * Handles user command and manipulates model accordingly.
    *

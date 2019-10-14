@@ -6,12 +6,13 @@ import java.util.List;
 import blockdude.model.BlockDudeModel;
 import blockdude.util.GamePiece;
 
+// FIXME: view will be updated after controller.. some code is hacky just to make controller function as i work on it
+
 /**
  * Represents a simple text-based view for the BlockDude game. Intended for use with the console.
  */
 public class TextBasedBlockDudeView implements BlockDudeView {
   private PrintStream out;
-  private BlockDudeViewHelper helper;
   private boolean hasRendered;
 
   /**
@@ -30,7 +31,7 @@ public class TextBasedBlockDudeView implements BlockDudeView {
   }
 
   @Override
-  public void refresh(BlockDudeModel model) throws IllegalStateException {
+  public void refresh(BlockDudeModel model, int levelIndex, String levelPassword) throws IllegalStateException {
     if (!hasRendered) {
       System.out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n- " +
               "W = move up\n- S = put block down, pick block up\n- /pass: = try password (after :" +
@@ -42,8 +43,8 @@ public class TextBasedBlockDudeView implements BlockDudeView {
     // fixme this method is so ugly i am so sorry to whoever is reading this
     StringBuilder outputString = new StringBuilder();
 
-    outputString.append("Level ").append(currentLevelIndexString());
-    outputString.append(" (password: ").append(helper.currentLevelPassword()).append(")\n\n");
+    outputString.append("Level ").append(levelIndexString(levelIndex));
+    outputString.append(" (password: ").append(levelPassword).append(")\n\n");
 
     List<List<GamePiece>> layout = model.layout();
 
@@ -76,11 +77,6 @@ public class TextBasedBlockDudeView implements BlockDudeView {
     this.out.print(outputString.toString());
   }
 
-  @Override
-  public void setHelper(BlockDudeViewHelper helper) {
-    this.helper = helper;
-  }
-
   /**
    * Determines and returns character to use to represent given GamePiece.
    *
@@ -109,12 +105,12 @@ public class TextBasedBlockDudeView implements BlockDudeView {
   }
 
   /**
-   * Returns the current level index as a string.
+   * Returns a string to use for the given level index (adds one and converts to string).
    *
-   * @return current level index as a string
+   * @param levelIndex index of current level
+   * @return string for given level index
    */
-  private String currentLevelIndexString() {
-    if (helper == null) return "[UNKNOWN]";
-    return Integer.toString(helper.currentLevelIndex() + 1);
+  private static String levelIndexString(int levelIndex) {
+    return Integer.toString(levelIndex + 1);
   }
 }

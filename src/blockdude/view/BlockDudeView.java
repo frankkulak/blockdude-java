@@ -2,6 +2,8 @@ package blockdude.view;
 
 import blockdude.model.BlockDudeModel;
 
+// FIXME: view will be updated after controller.. some code is hacky just to make controller function as i work on it
+
 /**
  * Represents a view for the BlockDude game.
  */
@@ -12,12 +14,5 @@ public interface BlockDudeView {
    * @param model model to refresh
    * @throws IllegalStateException if model cannot be rendered
    */
-  void refresh(BlockDudeModel model) throws IllegalStateException; // fixme change to take in layout & level info
-
-  /**
-   * Sets the helper for this view.
-   *
-   * @param helper helper for this view
-   */
-  void setHelper(BlockDudeViewHelper helper);
+  void refresh(BlockDudeModel model, int levelIndex, String levelPassword) throws IllegalStateException; // fixme change to take in layout & level info
 }

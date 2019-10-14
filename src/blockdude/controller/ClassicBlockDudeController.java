@@ -31,13 +31,12 @@ public class ClassicBlockDudeController implements BlockDudeController {
     this.model = model;
     this.view = view;
     this.levels = levels;
-    view.setHelper(this); // fixme get rid of this what was i even thinking
   }
 
   @Override
   public boolean handleCommand(String command) throws IllegalArgumentException, IllegalStateException {
     if (this.handleCommandHelper(command)) {
-      view.refresh(model);
+      refreshView();
       return true;
     } else {
       return false;
@@ -46,7 +45,7 @@ public class ClassicBlockDudeController implements BlockDudeController {
 
   @Override
   public void start() throws RuntimeException {
-    // todo impl
+    refreshView();
   }
 
   /**
@@ -99,16 +98,6 @@ public class ClassicBlockDudeController implements BlockDudeController {
     throw new IllegalArgumentException("Command \"" + command + "\" not recognized.");
   }
 
-  @Override
-  public int currentLevelIndex() {
-    return levels.currentLevelIndex();
-  }
-
-  @Override
-  public String currentLevelPassword() {
-    return levels.currentLevel().password();
-  }
-
   /**
    * Restarts the game from the first level.
    */
@@ -155,5 +144,12 @@ public class ClassicBlockDudeController implements BlockDudeController {
       // there is no next level, return false
       return false;
     }
+  }
+
+  /**
+   * TODO
+   */
+  private void refreshView() {
+    view.refresh(model, levels.currentLevelIndex(), levels.currentLevel().password());
   }
 }

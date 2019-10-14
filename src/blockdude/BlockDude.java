@@ -55,7 +55,7 @@ public class BlockDude {
     // fixme - clean up below code, right now this only works for text view, and this code should not be here
 
     // show game for first time
-    view.refresh(model);
+    controller.start();
     System.out.print("\n\n");
 
     // playing the game
