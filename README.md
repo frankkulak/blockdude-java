@@ -16,6 +16,4 @@ Right now, `text` is the only supported argument for the `-view` prompt, and it 
 
 ## Bugs
 
-There are two known bugs in the project currently:
-1. If the player is adjacent to, but not facing, a solid game piece (either a block or a wall), the view will not render when the player turns to face this game piece, even though it is stored in the model correctly. Making another valid move will render the board correctly. This bug can easily be observed at the start of level 2 (pass: ARo), and will surely be noticed while playing the game regularly. I plan to fix it when I touch up the controller.
-2. If the player picks up the block after encountering bug #1, the view will remove the block from where it previously was, but will not render it above the player. Note that the model knows that the player has picked up the block, but for some reason this is not rendered by the view until the player makes another valid move. This bug can also easily be observed at the start of level 2 (pass: ARo). I believe this bug will be fixed when I fix bug #1.
+If the player is adjacent to, but not facing, a solid game piece (either a block or a wall), the view will not render when the player turns to face this game piece, even though it is stored in the model correctly. Making another valid move will render the board correctly. This bug can easily be observed at the start of level 2 (pass: ARo), and will surely be noticed while playing the game regularly. I plan to fix it when I touch up the controller.
