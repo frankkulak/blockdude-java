@@ -81,11 +81,6 @@ public class TextBasedBlockDudeView implements BlockDudeView {
     this.helper = helper;
   }
 
-  @Override
-  public void modelUpdated(BlockDudeModel model) {
-    this.refresh(model);
-  }
-
   /**
    * Determines and returns character to use to represent given GamePiece.
    *

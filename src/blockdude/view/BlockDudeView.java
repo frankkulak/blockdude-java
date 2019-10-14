@@ -1,12 +1,11 @@
 package blockdude.view;
 
-import blockdude.controller.BlockDudeControllerListener;
 import blockdude.model.BlockDudeModel;
 
 /**
  * Represents a view for the BlockDude game.
  */
-public interface BlockDudeView extends BlockDudeControllerListener {
+public interface BlockDudeView {
   /**
    * Refreshes this view to display the current state of the given model.
    *

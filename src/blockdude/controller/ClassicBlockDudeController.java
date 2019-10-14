@@ -11,46 +11,33 @@ import blockdude.view.BlockDudeView;
 public class ClassicBlockDudeController implements BlockDudeController {
   private final BlockDudeModel model;
   private final LevelSet levels;
-  private BlockDudeControllerListener listener;
+  private final BlockDudeView view;
 
   /**
    * Constructs a new ClassicBlockDudeController using given model, view, and set of levels.
    *
    * @param model  model to control
-   * @param view   view for output / listener for this controller
+   * @param view   view for output
    * @param levels levels to load into model
-   * @throws IllegalArgumentException if given model or level set are null
+   * @throws IllegalArgumentException if given model, view, or level set are null
    */
-  public ClassicBlockDudeController(BlockDudeModel model, BlockDudeControllerListener view,
-                                    LevelSet levels) throws IllegalArgumentException {
-    if (model == null || levels == null) {
-      throw new IllegalArgumentException("Model and levels must be non-null.");
+  public ClassicBlockDudeController(BlockDudeModel model, BlockDudeView view, LevelSet levels)
+          throws IllegalArgumentException {
+    if (model == null || levels == null || view == null) {
+      throw new IllegalArgumentException("Model, view, and levels must be non-null.");
     }
-
-    // fixme - make require view and model, run by passing levels
 
     model.loadLevel(levels.currentLevel());
     this.model = model;
+    this.view = view;
     this.levels = levels;
-    setListener(view);
-    ((BlockDudeView) view).setHelper(this);
-  }
-
-  /**
-   * A private listener to use when no real listener has been assigned. Created to reduce number of
-   * NullPointerExceptions if no listener is assigned to this controller.
-   */
-  private class EmptyListener implements BlockDudeControllerListener {
-    @Override
-    public void modelUpdated(BlockDudeModel model) {
-      // intentionally empty
-    }
+    view.setHelper(this); // fixme get rid of this what was i even thinking
   }
 
   @Override
   public boolean handleCommand(String command) throws IllegalArgumentException, IllegalStateException {
     if (this.handleCommandHelper(command)) {
-      this.notifyListenerThatModelUpdated();
+      view.refresh(model);
       return true;
     } else {
       return false;
@@ -113,15 +100,6 @@ public class ClassicBlockDudeController implements BlockDudeController {
   }
 
   @Override
-  public void setListener(BlockDudeControllerListener listener) {
-    if (listener == null) {
-      this.listener = new EmptyListener();
-    } else {
-      this.listener = listener;
-    }
-  }
-
-  @Override
   public int currentLevelIndex() {
     return levels.currentLevelIndex();
   }
@@ -177,12 +155,5 @@ public class ClassicBlockDudeController implements BlockDudeController {
       // there is no next level, return false
       return false;
     }
-  }
-
-  /**
-   * Notifies listener that model has been updated.
-   */
-  private void notifyListenerThatModelUpdated() {
-    this.listener.modelUpdated(this.model);
   }
 }

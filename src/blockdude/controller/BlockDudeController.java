@@ -27,13 +27,6 @@ public interface BlockDudeController extends BlockDudeViewHelper {
   boolean handleCommand(String command) throws IllegalArgumentException, IllegalStateException;
 
   /**
-   * Sets listener of this controller to given listener.
-   *
-   * @param listener listener to add to this controller
-   */
-  void setListener(BlockDudeControllerListener listener);
-
-  /**
    * TODO
    *
    * @throws RuntimeException todo
