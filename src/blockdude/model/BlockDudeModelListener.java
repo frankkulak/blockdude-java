@@ -5,7 +5,12 @@ package blockdude.model;
  */
 public interface BlockDudeModelListener {
   /**
-   * Notifies listener that the game has been won (i.e. the player has reached the door).
+   * Notifies listener that the player has reached the door (the level has been beat).
    */
-  void gameWon();
+  void doorReached();
+
+  /**
+   * Notifies listener that the model has finished updating.
+   */
+  void finishedUpdating();
 }

@@ -6,14 +6,6 @@ import blockdude.util.GamePiece;
 import blockdude.util.Level;
 import blockdude.util.Position;
 
-// FIXME: POTENTIAL ISSUES WITH THIS MODEL
-//        1) It is possible to move left, right, and up while holding a block, even if there is a
-//           solid game piece directly above the player. This means that the block the player is
-//           holding would overlap with the block above the player. I do not know the expected
-//           behavior for this case, but it will never become an issue with the current levels.
-//        2) It is possible to pick up a block while there is a block above the player. See above
-//           for why this is an issue.
-
 /**
  * Represents the classic Block Dude game model.
  */
@@ -42,7 +34,12 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
    */
   private class EmptyListener implements BlockDudeModelListener {
     @Override
-    public void gameWon() {
+    public void doorReached() {
+      throw new RuntimeException("No listener has been set for the model.");
+    }
+
+    @Override
+    public void finishedUpdating() {
       throw new RuntimeException("No listener has been set for the model.");
     }
   }
@@ -57,12 +54,13 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   /* Interface methods -------------------------------------------------------------------------- */
 
   @Override
-  public void restartLevel() throws IllegalStateException {
+  public void restartLevel() throws RuntimeException {
     requireLevel();
     playerPosition = level.playerPosition();
     player = level.player();
     heldPiece = null;
     layout = level.layout();
+    listener.finishedUpdating();
   }
 
   @Override
@@ -73,75 +71,65 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public boolean moveLeft() throws IllegalStateException {
-    return movePlayerHorizontally(Direction.LEFT);
+  public boolean moveLeft() throws RuntimeException {
+    boolean stateChanged = movePlayerHorizontally(Direction.LEFT);
+    listener.finishedUpdating();
+    return stateChanged;
   }
 
   @Override
-  public boolean moveRight() throws IllegalStateException {
-    return movePlayerHorizontally(Direction.RIGHT);
+  public boolean moveRight() throws RuntimeException {
+    boolean stateChanged = movePlayerHorizontally(Direction.RIGHT);
+    listener.finishedUpdating();
+    return stateChanged;
   }
 
   @Override
-  public boolean moveUp() throws IllegalStateException {
+  public boolean moveUp() throws RuntimeException {
     requireLevel();
 
-    try {
-      int playerRow = playerPosition.y;
-      int playerCol = playerPosition.x;
-      int newPlayerRow = playerRow - 1;
-      GamePiece pieceAbove = getGamePieceAt(playerCol, newPlayerRow);
+    // making sure piece above player is not solid
+    GamePiece pieceAbovePlayer = getGamePiece(shiftPosition(playerPosition, 0, -1));
+    if (GamePiece.isSolid(pieceAbovePlayer)) return false;
 
-      // if the piece above the player is not solid, move the player up one block
-      if (GamePiece.isSolid(pieceAbove)) throw new IllegalStateException("Unable to move up.");
-      playerPosition.y = newPlayerRow;
-      setGamePieceAt(GamePiece.EMPTY, playerCol, playerRow);
-      setGamePieceAt(player, playerCol, newPlayerRow);
+    // making sure piece to side is solid and does not have a solid piece above it
+    int colDif = (player == GamePiece.PLAYER_LEFT ? -1 : 1);
+    Position positionToSide = shiftPosition(playerPosition, colDif, 0);
+    Position targetPosition = shiftPosition(playerPosition, colDif, -1);
+    GamePiece pieceToSide = getGamePiece(positionToSide);
+    GamePiece targetPiece = getGamePiece(targetPosition);
+    if (!GamePiece.isSolid(pieceToSide) || GamePiece.isSolid(targetPiece)) return false;
 
-      // move the player horizontally the way it is facing
-      Direction direction = getDirectionFromPlayer(player);
-      boolean movedHorizontally = movePlayerHorizontally(direction);
-
-      // if player couldn't move horizontally, place it back to where it was
-      if (!movedHorizontally) {
-        playerPosition.y++;
-        setGamePieceAt(GamePiece.EMPTY, playerCol, newPlayerRow);
-        setGamePieceAt(player, playerCol, playerRow);
-        return false;
-      }
-
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // no move up is possible since exception was thrown, so return false
-      return false;
-    }
+    // move player to target position and return true
+    setGamePiece(targetPosition, player);
+    setGamePiece(playerPosition, GamePiece.EMPTY);
+    playerPosition = targetPosition.copy();
+    listener.finishedUpdating();
+    return true;
   }
 
   @Override
-  public boolean pickUpOrPutDown() throws IllegalStateException {
-    // will throw ISE if there is no level loaded
-    return (heldPiece == null) ? pickUp() : putDown();
+  public boolean pickUpOrPutDown() throws RuntimeException {
+    boolean stateChanged = (heldPiece == null) ? pickUp() : putDown();
+    listener.finishedUpdating();
+    return stateChanged;
   }
 
   @Override
-  public GamePiece pieceHeldByPlayer() throws IllegalStateException {
+  public GamePiece pieceHeldByPlayer() throws RuntimeException {
     requireLevel();
     return heldPiece;
   }
 
   @Override
-  public List<List<GamePiece>> layout() throws IllegalStateException {
-    this.requireLevel();
-    return this.layout;
+  public List<List<GamePiece>> layout() throws RuntimeException {
+    requireLevel();
+    return layout;
   }
 
   @Override
   public void setListener(BlockDudeModelListener listener) {
-    if (listener == null) {
-      this.listener = new EmptyListener();
-    } else {
-      this.listener = listener;
-    }
+    this.listener = (listener == null) ? new EmptyListener() : listener;
   }
 
   /* Private methods ---------------------------------------------------------------------------- */
@@ -151,153 +139,156 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
    *
    * @param direction horizontal direction to move in
    * @return whether or not anything changed after making this move
-   * @throws IllegalStateException if no level has been loaded into model yet
+   * @throws RuntimeException if no level has been loaded into model yet or if piece reaches board
+   *                          edge (index off board is accessed)
    */
-  private boolean movePlayerHorizontally(Direction direction) throws IllegalStateException {
+  private boolean movePlayerHorizontally(Direction direction) throws RuntimeException {
     requireLevel();
 
-    try {
-      int changeInCol = (direction == Direction.LEFT ? -1 : 1);
+    boolean playerOrientationChanged = changePlayerDirection(direction);
 
-      int playerRow = playerPosition.y;
-      int playerCol = playerPosition.x;
-      int newPlayerRow = playerRow;
-      int newPlayerCol = playerCol + changeInCol;
+    int colDif = (direction == Direction.LEFT ? -1 : 1);
+    Position positionToSide = shiftPosition(playerPosition, colDif, 0);
+    GamePiece pieceToSide = getGamePiece(positionToSide);
 
-      // this might throw ArrayIndexOutOfBoundsException
-      GamePiece pieceToSide = getGamePieceAt(newPlayerCol, playerRow);
+    // making sure piece at player's side is not solid
+    if (GamePiece.isSolid(pieceToSide)) return playerOrientationChanged;
 
-      // check if piece to side is solid, if so, player cannot move that way
-      if (GamePiece.isSolid(pieceToSide)) throw new IllegalStateException("Cannot move that way.");
+    // moving player in direction and applying gravity
+    setGamePiece(positionToSide, player);
+    setGamePiece(playerPosition, GamePiece.EMPTY);
+    playerPosition = positionToSide.copy();
+    applyGravity(playerPosition);
 
-      // make the player face the correct direction
-      changePlayerDirection(direction);
+    // checking if piece to player's side is a door
+    if (pieceToSide == GamePiece.DOOR) listener.doorReached();
 
-      // fixme: trying to access newPlayerRow + 1 might throw an ArrayIndexOutOfBoundsException
-      // move down until the player hits a solid block
-      GamePiece pieceBelow = getGamePieceAt(newPlayerCol, newPlayerRow + 1);
-      while (!GamePiece.isSolid(pieceBelow)) {
-        newPlayerRow++;
-        pieceBelow = getGamePieceAt(newPlayerCol, newPlayerRow + 1);
-      }
+    return true;
+  }
 
-      // move player to target location
-      GamePiece pieceEnteredByPlayer = getGamePieceAt(newPlayerCol, newPlayerRow);
-      boolean gameWon = false;
-      GamePiece pieceToUseForPlayer = player;
-      switch (pieceEnteredByPlayer) {
-        case DOOR:
-          pieceToUseForPlayer = GamePiece.PLAYER_DOOR;
-          gameWon = true;
-          break;
-        case EMPTY:
-          break;
-        default:
-          // this should never be thrown - don't catch it, because if it is thrown, that's an issue
-          throw new RuntimeException("Player tried to enter a block that cannot be entered.");
-      }
+  /**
+   * Picks up the game piece in front of player, if able to do so. If there is a block above the
+   * player or target game piece, the player will not be able to pick it up.
+   *
+   * @return true if picking up was successful and changed the state of the board, false otherwise
+   * @throws RuntimeException if no level has been loaded into model yet or if piece reaches board
+   *                          edge (index off board is accessed)
+   */
+  private boolean pickUp() throws RuntimeException {
+    requireLevel();
 
-      // set player to new position, remove player from old position
-      playerPosition.x = newPlayerCol;
-      playerPosition.y = newPlayerRow;
-      this.setGamePieceAt(pieceToUseForPlayer, newPlayerCol, newPlayerRow);
-      this.setGamePieceAt(GamePiece.EMPTY, playerCol, playerRow);
+    // finding piece at side of player
+    int colDif = (player == GamePiece.PLAYER_LEFT ? -1 : 1);
+    Position targetPosition = shiftPosition(playerPosition, colDif, 0);
+    GamePiece pieceToSide = getGamePiece(targetPosition);
 
-      // notify listener that game was won
-      if (gameWon) listener.gameWon();
+    // make sure the piece is able to be picked up
+    if (!GamePiece.canPickUp(pieceToSide)) return false;
 
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // either the player tried to move off the board, or there is a solid block in the way of the
-      // player moving in the specified direction - try to at least make the player face the
-      // direction and return whether or not the player's direction has changed
-      return changePlayerDirection(direction);
+    // make sure there is nothing on top of piece or above the player
+    Position posAboveTarget = shiftPosition(targetPosition, 0, -1);
+    GamePiece pieceAboveTarget = getGamePiece(posAboveTarget);
+    if (GamePiece.isSolid(pieceAboveTarget)) return false;
+    Position posAbovePlayer = shiftPosition(playerPosition, 0, -1);
+    GamePiece pieceAbovePlayer = getGamePiece(posAbovePlayer);
+    if (GamePiece.isSolid(pieceAbovePlayer)) return false;
+
+    // pick up the piece and return true
+    heldPiece = pieceToSide;
+    setGamePiece(targetPosition, GamePiece.EMPTY);
+    return true;
+  }
+
+  /**
+   * Puts down the game piece that player is holding. If the block immediately to the facing
+   * direction of the player is solid, then the piece will be placed on top of it (as long as the
+   * piece above is not also solid), otherwise, it will be placed immediately in front of the player
+   * and will fall until it hits a solid block.
+   *
+   * @return true if putting down was successful and changed the state of the board, false otherwise
+   * @throws RuntimeException if no level has been loaded into model yet or if piece reaches board
+   *                          edge (index off board is accessed)
+   */
+  private boolean putDown() throws RuntimeException {
+    requireLevel();
+
+    // finding piece at side of player
+    int colDif = (player == GamePiece.PLAYER_LEFT ? -1 : 1);
+    Position targetPosition = shiftPosition(playerPosition, colDif, 0);
+    GamePiece pieceToSide = getGamePiece(targetPosition);
+
+    // checking if piece at target position is solid or not
+    if (GamePiece.isSolid(pieceToSide)) {
+      // piece to side is solid, check if can place block above it
+      Position positionAbove = shiftPosition(targetPosition, 0, -1);
+      GamePiece pieceAbove = getGamePiece(positionAbove);
+      if (GamePiece.isSolid(pieceAbove)) return false;
+      targetPosition = positionAbove;
+    }
+
+    // put piece down, apply gravity, and return true
+    setGamePiece(targetPosition, heldPiece);
+    heldPiece = null;
+    applyGravity(targetPosition);
+    return true;
+  }
+
+  /**
+   * Moves the game piece at the given position down until it hits a solid game piece.
+   *
+   * @param pos position of piece to apply gravity to
+   * @throws RuntimeException if piece reaches board edge (index off board is accessed)
+   */
+  private void applyGravity(Position pos) throws RuntimeException {
+    // finding new position of piece
+    Position newPos = pos.copy();
+    GamePiece pieceBelow = getGamePiece(shiftPosition(pos, 0, 1));
+    while (!GamePiece.isSolid(pieceBelow)) {
+      newPos.row++;
+      pieceBelow = getGamePiece(shiftPosition(newPos, 0, 1));
+    }
+
+    // move piece to new position
+    if (pos.equals(newPos)) return;
+    GamePiece piece = getGamePiece(pos);
+    GamePiece reachedPiece = getGamePiece(newPos);
+    setGamePiece(newPos, piece);
+    setGamePiece(pos, GamePiece.EMPTY);
+
+    // if piece is the player, update player position & check if door reached
+    if (GamePiece.isPlayer(piece)) {
+      playerPosition = newPos.copy();
+      if (reachedPiece == GamePiece.DOOR) listener.doorReached();
     }
   }
 
   /**
-   * Picks up game piece in front of player, if able to do so.
+   * Finds and returns the game piece at the given position.
    *
-   * @return true if picking up changed the state of the board, false otherwise
-   * @throws IllegalStateException if no level has been loaded into model yet
+   * @param pos position at which to get game piece
+   * @return game piece at the given position
+   * @throws RuntimeException if position is not on game board
    */
-  private boolean pickUp() throws IllegalStateException {
-    requireLevel();
-
+  private GamePiece getGamePiece(Position pos) throws RuntimeException {
     try {
-      // finding piece to pick up
-      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
-      int pieceCol = playerPosition.x + colDif;
-      int pieceRow = playerPosition.y;
-      GamePiece pieceToSide = getGamePieceAt(pieceCol, pieceRow);
-
-      // make sure the piece is solid
-      if (!GamePiece.isSolid(pieceToSide))
-        throw new IllegalStateException("Cannot pick up piece because it is not solid.");
-
-      // make sure there is nothing on top of piece you're trying to pick up
-      GamePiece aboveTarget = getGamePieceAt(pieceCol, pieceRow - 1);
-      if (GamePiece.isSolid(aboveTarget))
-        throw new IllegalStateException("Cannot pick up piece because it is under another piece.");
-
-      // picking up piece, if possible (adds block to player directly)
-      if (heldPiece != null)
-        throw new IllegalStateException("Cannot pick up block because already holding one.");
-      heldPiece = pieceToSide;
-
-      // picking up piece was successful, so remove from where it was & return true
-      setGamePieceAt(GamePiece.EMPTY, pieceCol, pieceRow);
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // something prevented block from being picked up
-      // - AIOBE = tried to pick something up when player is at board edge
-      // - ISE = player is already holding a block, or there is block on top of one trying to lift
-      return false;
+      return layout.get(pos.row).get(pos.col);
+    } catch (IndexOutOfBoundsException e) {
+      throw new RuntimeException("Tried to access index that is not on the board.");
     }
   }
 
   /**
-   * Puts the game piece that player is holding down in front of player.
+   * Sets the value at the given position to the given game piece.
    *
-   * @return true if putting down changed the state of the board, false otherwise
-   * @throws IllegalStateException if no level has been loaded into model yet
+   * @param pos position at which to set game piece
+   * @param gp  game piece to set at position
+   * @throws RuntimeException if position is not on game board
    */
-  private boolean putDown() throws IllegalStateException {
-    requireLevel();
-
+  private void setGamePiece(Position pos, GamePiece gp) throws RuntimeException {
     try {
-      // finding piece at side of player
-      int colDif = (getDirectionFromPlayer(player) == Direction.LEFT ? -1 : 1);
-      int targetCol = playerPosition.x + colDif;
-      int targetRow = playerPosition.y;
-      GamePiece pieceToSide = getGamePieceAt(targetCol, targetRow);
-
-      // check if target place is solid or not
-      if (GamePiece.isSolid(pieceToSide)) {
-        // piece to side is solid, check if can place block above it
-        targetRow--;
-        GamePiece pieceAbovePieceToSide = getGamePieceAt(targetCol, targetRow);
-        if (GamePiece.isSolid(pieceAbovePieceToSide)) return false;
-      } else {
-        // move down until piece hits a solid block
-        GamePiece pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
-        while (!GamePiece.isSolid(pieceBelow)) {
-          targetRow++;
-          pieceBelow = getGamePieceAt(targetCol, targetRow + 1);
-        }
-      }
-
-      // put piece down
-      GamePiece pieceToPutDown = heldPiece;
-      heldPiece = null;
-      setGamePieceAt(pieceToPutDown, targetCol, targetRow);
-
-      return true;
-    } catch (ArrayIndexOutOfBoundsException | IllegalStateException e) {
-      // something prevented block from being put down
-      // - AIOBE = tried to put block down out of bounds
-      // - ISE = nowhere to put block
-      return false;
+      layout.get(pos.row).set(pos.col, gp);
+    } catch (IndexOutOfBoundsException e) {
+      throw new RuntimeException("Tried to access index that is not on the board.");
     }
   }
 
@@ -314,59 +305,36 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   /**
+   * Throws RuntimeException if this model does not have a level to perform operations on.
+   *
+   * @throws RuntimeException if model does not have a level set
+   */
+  private void requireLevel() throws RuntimeException {
+    if (level == null) throw new RuntimeException("Tried to use model before loading level.");
+  }
+
+  /* Static methods ----------------------------------------------------------------------------- */
+
+  /**
    * Returns a player facing the given direction.
    *
-   * @param direction direction for player to face
-   * @return player facing giving direction
+   * @param direction direction that player should be facing
+   * @return player facing given direction
    */
   private static GamePiece getPlayerFromDirection(Direction direction) {
     return direction == Direction.LEFT ? GamePiece.PLAYER_LEFT : GamePiece.PLAYER_RIGHT;
   }
 
   /**
-   * Returns the direction in which the given player is facing.
+   * Returns a new position in which the column and row indices are shifted from the given position
+   * by the given row and column offsets.
    *
-   * @param player player that is facing some direction
-   * @return direction that player is facing
+   * @param pos       original position
+   * @param colOffset difference in column index
+   * @param rowOffset difference in row index
+   * @return new position with shifted row and column indices
    */
-  private static Direction getDirectionFromPlayer(GamePiece player) {
-    return player == GamePiece.PLAYER_LEFT ? Direction.LEFT : Direction.RIGHT;
-  }
-
-  /**
-   * Finds and returns GamePiece at given row and column. This is made to reduce confusion with x/y
-   * and row/col line up and to therefore (hopefully) reduce bugs.
-   *
-   * @param col column of GP to retrieve
-   * @param row row of GP to retrieve
-   * @return GamePiece at given location
-   * @throws ArrayIndexOutOfBoundsException if row or col exceeds bounds of layout
-   */
-  private GamePiece getGamePieceAt(int col, int row) throws ArrayIndexOutOfBoundsException {
-    return this.layout.get(row).get(col);
-  }
-
-  /**
-   * Sets value at given row and col to given GamePiece, if not null.
-   *
-   * @param gp  GamePiece to set value at indices to
-   * @param col column of posn for new GamePiece
-   * @param row row of posn for new GamePiece
-   * @throws IllegalArgumentException       if given GamePiece is null
-   * @throws ArrayIndexOutOfBoundsException if row or col exceeds bounds of layout
-   */
-  private void setGamePieceAt(GamePiece gp, int col, int row)
-          throws IllegalArgumentException, ArrayIndexOutOfBoundsException {
-    if (gp == null) throw new IllegalArgumentException("Cannot set value to null GamePiece.");
-    this.layout.get(row).set(col, gp);
-  }
-
-  /**
-   * Throws ISE if this model does not have a level to perform operations on.
-   *
-   * @throws IllegalStateException if model does not have a level set
-   */
-  private void requireLevel() throws IllegalStateException {
-    if (level == null) throw new IllegalStateException("Tried to use model before loading level.");
+  private static Position shiftPosition(Position pos, int colOffset, int rowOffset) {
+    return new Position(pos.col + colOffset, pos.row + rowOffset);
   }
 }

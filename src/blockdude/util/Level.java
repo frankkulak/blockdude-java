@@ -109,15 +109,10 @@ public class Level {
           errorMessage += "More than one player specified;";
         }
 
-        if (gp == GamePiece.PLAYER_DOOR) {
-          invalidLevelConfiguration = true;
-          errorMessage += "Player initially placed in door;";
-        } else {
-          player = gp;
-          int x = finalRow.size() - 1;
-          int y = layout.size() - 1;
-          playerPosition = new Position(x, y);
-        }
+        player = gp;
+        int x = finalRow.size() - 1;
+        int y = layout.size() - 1;
+        playerPosition = new Position(x, y);
       }
     }
 

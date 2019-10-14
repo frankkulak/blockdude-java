@@ -4,7 +4,7 @@ package blockdude.util;
  * Represents game pieces in the Block Dude game.
  */
 public enum GamePiece {
-  BLOCK, DOOR, EMPTY, PLAYER_LEFT, PLAYER_RIGHT, PLAYER_DOOR, WALL;
+  BLOCK, DOOR, EMPTY, PLAYER_LEFT, PLAYER_RIGHT, WALL;
 
   /* Public methods ----------------------------------------------------------------------------- */
 
@@ -26,7 +26,7 @@ public enum GamePiece {
    * @return true if game piece is a player, false otherwise
    */
   public static boolean isPlayer(GamePiece gp) {
-    GamePiece[] playerPieces = {PLAYER_LEFT, PLAYER_RIGHT, PLAYER_DOOR};
+    GamePiece[] playerPieces = {PLAYER_LEFT, PLAYER_RIGHT};
     return contains(playerPieces, gp);
   }
 

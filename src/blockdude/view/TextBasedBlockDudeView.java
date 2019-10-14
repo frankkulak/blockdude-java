@@ -102,8 +102,6 @@ public class TextBasedBlockDudeView implements BlockDudeView {
         return '<';
       case PLAYER_RIGHT:
         return '>';
-      case PLAYER_DOOR:
-        return '!';
       case BLOCK:
         return '\u25A2'; // hollow box
       case WALL:

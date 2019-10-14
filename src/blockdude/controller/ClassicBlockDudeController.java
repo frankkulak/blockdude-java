@@ -13,6 +13,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   private final BlockDudeModel model;
   private final LevelSet levels;
   private BlockDudeControllerListener listener;
+  private boolean doorReached;
 
   /**
    * Constructs a new ClassicBlockDudeController using given model, view, and set of levels.
@@ -30,12 +31,13 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
 
     // fixme - make require view and model, run by passing levels
 
-    model.loadLevel(levels.currentLevel());
     model.setListener(this);
+    model.loadLevel(levels.currentLevel());
     this.model = model;
     this.levels = levels;
     setListener(view);
     ((BlockDudeView) view).setHelper(this);
+    doorReached = false;
   }
 
   /**
@@ -118,9 +120,17 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   }
 
   @Override
-  public void gameWon() {
-    // fixme what else? notify view?
-    this.nextLevel();
+  public void doorReached() {
+    doorReached = true;
+  }
+
+  @Override
+  public void finishedUpdating() {
+    if (doorReached) {
+      doorReached = false;
+      listener.modelUpdated(model);
+      nextLevel();
+    }
   }
 
   @Override
@@ -137,6 +147,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    * Restarts the game from the first level.
    */
   private void restartGame() {
+    doorReached = false;
     this.levels.restart();
     this.model.loadLevel(this.levels.currentLevel());
   }
@@ -145,6 +156,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    * Restarts the current level.
    */
   private void restartLevel() {
+    doorReached = false;
     this.model.restartLevel();
   }
 
@@ -157,6 +169,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   private boolean tryLevelPassword(String password) {
     try {
       Level level = this.levels.tryPassword(password);
+      doorReached = false;
       this.model.loadLevel(level);
       return true;
     } catch (IllegalArgumentException e) {
@@ -172,6 +185,7 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    */
   private boolean nextLevel() {
     try {
+      doorReached = false;
       Level nextLevel = this.levels.nextLevel();
       this.model.loadLevel(nextLevel);
       return true;

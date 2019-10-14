@@ -1,28 +1,46 @@
 package blockdude.util;
 
 /**
- * Represents a 2D position in a plane with X and Y coordinates.
+ * Represents a position on the Block Dude game board. Column indices are equivalent to coordinates
+ * on the x axis, while row indices are equivalent to those on the y axis.
  */
 public final class Position {
-  public int x, y;
+  public int col, row;
 
   /**
-   * Constructs a new Position object using given x and y values.
+   * Constructs a new Position object using given col and row values.
    *
-   * @param x x coordinate of position
-   * @param y y coordinate of position
+   * @param col column index of position
+   * @param row row index of position
    */
-  public Position(int x, int y) {
-    this.x = x;
-    this.y = y;
+  public Position(int col, int row) {
+    this.col = col;
+    this.row = row;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof Position)) return false;
+    Position that = (Position) other;
+    return col == that.col && row == that.row;
+  }
+
+  @Override
+  public int hashCode() {
+    return toString().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "(" + col + "," + row + ")";
   }
 
   /**
-   * Returns new Position object with same x and y coordinates as this one.
+   * Returns new Position object with same col and row coordinates as this one.
    *
-   * @return new Position object with current x and y values
+   * @return new Position object with current col and row values
    */
   public Position copy() {
-    return new Position(x, y);
+    return new Position(col, row);
   }
 }
