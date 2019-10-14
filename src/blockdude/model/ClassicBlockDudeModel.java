@@ -16,7 +16,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   private Position playerPosition; // INVARIANT: never has coors beyond limits of board
   private List<List<GamePiece>> layout; // INVARIANT: correct for current level
 
-  private GamePiece heldPiece;
+  private GamePiece heldPiece; // will be null if nothing is held
   private boolean doorReached;
 
   private enum Direction { LEFT, RIGHT }
@@ -37,7 +37,6 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   public void loadLevel(Level level) throws IllegalArgumentException {
     if (level == null) throw new IllegalArgumentException("Cannot load null level into model.");
     this.level = level;
-    doorReached = false;
     restartLevel();
   }
 
