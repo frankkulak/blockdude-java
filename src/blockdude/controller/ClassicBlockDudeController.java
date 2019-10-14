@@ -1,7 +1,6 @@
 package blockdude.controller;
 
 import blockdude.model.BlockDudeModel;
-import blockdude.model.BlockDudeModelListener;
 import blockdude.util.Level;
 import blockdude.util.LevelSet;
 import blockdude.view.BlockDudeView;
@@ -9,11 +8,10 @@ import blockdude.view.BlockDudeView;
 /**
  * Represents a generic controller for the classic BlockDude game.
  */
-public class ClassicBlockDudeController implements BlockDudeController, BlockDudeModelListener {
+public class ClassicBlockDudeController implements BlockDudeController {
   private final BlockDudeModel model;
   private final LevelSet levels;
   private BlockDudeControllerListener listener;
-  private boolean doorReached;
 
   /**
    * Constructs a new ClassicBlockDudeController using given model, view, and set of levels.
@@ -31,13 +29,11 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
 
     // fixme - make require view and model, run by passing levels
 
-    model.setListener(this);
     model.loadLevel(levels.currentLevel());
     this.model = model;
     this.levels = levels;
     setListener(view);
     ((BlockDudeView) view).setHelper(this);
-    doorReached = false;
   }
 
   /**
@@ -78,13 +74,19 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
     // fixme I know this is ugly, but commands will be used eventually
     if (command.equalsIgnoreCase("A")) {
       // move left
-      return this.model.moveLeft();
+      boolean result = this.model.moveLeft();
+      if (model.isLevelCompleted()) nextLevel();
+      return result;
     } else if (command.equalsIgnoreCase("D")) {
       // move right
-      return this.model.moveRight();
+      boolean result = this.model.moveRight();
+      if (model.isLevelCompleted()) nextLevel();
+      return result;
     } else if (command.equalsIgnoreCase("W")) {
       // move up
-      return this.model.moveUp();
+      boolean result = this.model.moveUp();
+      if (model.isLevelCompleted()) nextLevel();
+      return result;
     } else if (command.equalsIgnoreCase("S")) {
       // either put down or pick up
       return this.model.pickUpOrPutDown();
@@ -120,20 +122,6 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   }
 
   @Override
-  public void doorReached() {
-    doorReached = true;
-  }
-
-  @Override
-  public void finishedUpdating() {
-    if (doorReached) {
-      doorReached = false;
-      listener.modelUpdated(model);
-      nextLevel();
-    }
-  }
-
-  @Override
   public int currentLevelIndex() {
     return levels.currentLevelIndex();
   }
@@ -147,7 +135,6 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    * Restarts the game from the first level.
    */
   private void restartGame() {
-    doorReached = false;
     this.levels.restart();
     this.model.loadLevel(this.levels.currentLevel());
   }
@@ -156,7 +143,6 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    * Restarts the current level.
    */
   private void restartLevel() {
-    doorReached = false;
     this.model.restartLevel();
   }
 
@@ -169,7 +155,6 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
   private boolean tryLevelPassword(String password) {
     try {
       Level level = this.levels.tryPassword(password);
-      doorReached = false;
       this.model.loadLevel(level);
       return true;
     } catch (IllegalArgumentException e) {
@@ -185,7 +170,6 @@ public class ClassicBlockDudeController implements BlockDudeController, BlockDud
    */
   private boolean nextLevel() {
     try {
-      doorReached = false;
       Level nextLevel = this.levels.nextLevel();
       this.model.loadLevel(nextLevel);
       return true;

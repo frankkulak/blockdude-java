@@ -15,41 +15,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   private GamePiece heldPiece; // might be null if player is not holding a piece
   private Position playerPosition; // INVARIANT: never has coors beyond limits of board
   private List<List<GamePiece>> layout; // INVARIANT: never null, correct for stored level
-  private BlockDudeModelListener listener; // INVARIANT: never null
+  private boolean doorReached;
 
-  /* Initialization ----------------------------------------------------------------------------- */
-
-  /**
-   * Constructs a new ClassicBlockDudeModel with an empty listener.
-   */
-  public ClassicBlockDudeModel() {
-    listener = new EmptyListener();
-  }
-
-  /* Private classes/enums ---------------------------------------------------------------------- */
-
-  /**
-   * A private listener to use when no real listener has been assigned. Created to reduce number of
-   * NullPointerExceptions if no listener is assigned to this model, making debugging easier.
-   */
-  private class EmptyListener implements BlockDudeModelListener {
-    @Override
-    public void doorReached() {
-      throw new RuntimeException("No listener has been set for the model.");
-    }
-
-    @Override
-    public void finishedUpdating() {
-      throw new RuntimeException("No listener has been set for the model.");
-    }
-  }
-
-  /**
-   * Represents a direction the player can be facing and move in, either left or right.
-   */
-  private enum Direction {
-    LEFT, RIGHT
-  }
+  private enum Direction { LEFT, RIGHT }
 
   /* Interface methods -------------------------------------------------------------------------- */
 
@@ -60,28 +28,25 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
     player = level.player();
     heldPiece = null;
     layout = level.layout();
-    listener.finishedUpdating();
+    doorReached = false;
   }
 
   @Override
   public void loadLevel(Level level) throws IllegalArgumentException {
     if (level == null) throw new IllegalArgumentException("Cannot load null level into model.");
     this.level = level;
+    doorReached = false;
     restartLevel();
   }
 
   @Override
   public boolean moveLeft() throws RuntimeException {
-    boolean stateChanged = movePlayerHorizontally(Direction.LEFT);
-    listener.finishedUpdating();
-    return stateChanged;
+    return movePlayerHorizontally(Direction.LEFT);
   }
 
   @Override
   public boolean moveRight() throws RuntimeException {
-    boolean stateChanged = movePlayerHorizontally(Direction.RIGHT);
-    listener.finishedUpdating();
-    return stateChanged;
+    return movePlayerHorizontally(Direction.RIGHT);
   }
 
   @Override
@@ -95,24 +60,25 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
     // making sure piece to side is solid and does not have a solid piece above it
     int colDif = (player == GamePiece.PLAYER_LEFT ? -1 : 1);
     Position positionToSide = shiftPosition(playerPosition, colDif, 0);
-    Position targetPosition = shiftPosition(playerPosition, colDif, -1);
     GamePiece pieceToSide = getGamePiece(positionToSide);
+    Position targetPosition = shiftPosition(playerPosition, colDif, -1);
     GamePiece targetPiece = getGamePiece(targetPosition);
     if (!GamePiece.isSolid(pieceToSide) || GamePiece.isSolid(targetPiece)) return false;
 
-    // move player to target position and return true
+    // move player to target position
     setGamePiece(targetPosition, player);
     setGamePiece(playerPosition, GamePiece.EMPTY);
     playerPosition = targetPosition.copy();
-    listener.finishedUpdating();
+
+    // check if door reached
+    if (targetPiece == GamePiece.DOOR) doorReached = true;
+
     return true;
   }
 
   @Override
   public boolean pickUpOrPutDown() throws RuntimeException {
-    boolean stateChanged = (heldPiece == null) ? pickUp() : putDown();
-    listener.finishedUpdating();
-    return stateChanged;
+    return (heldPiece == null) ? pickUp() : putDown();
   }
 
   @Override
@@ -128,8 +94,9 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public void setListener(BlockDudeModelListener listener) {
-    this.listener = (listener == null) ? new EmptyListener() : listener;
+  public boolean isLevelCompleted() throws RuntimeException {
+    requireLevel();
+    return doorReached;
   }
 
   /* Private methods ---------------------------------------------------------------------------- */
@@ -161,7 +128,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
     applyGravity(playerPosition);
 
     // checking if piece to player's side is a door
-    if (pieceToSide == GamePiece.DOOR) listener.doorReached();
+    if (pieceToSide == GamePiece.DOOR) doorReached = true;
 
     return true;
   }
@@ -258,7 +225,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
     // if piece is the player, update player position & check if door reached
     if (GamePiece.isPlayer(piece)) {
       playerPosition = newPos.copy();
-      if (reachedPiece == GamePiece.DOOR) listener.doorReached();
+      if (reachedPiece == GamePiece.DOOR) doorReached = true;
     }
   }
 

@@ -78,9 +78,10 @@ public interface BlockDudeModel {
   List<List<GamePiece>> layout() throws RuntimeException;
 
   /**
-   * Sets listener of this model to given listener.
+   * TODO
    *
-   * @param listener listener to add to this model
+   * @return todo
+   * @throws RuntimeException todo
    */
-  void setListener(BlockDudeModelListener listener);
+  boolean isLevelCompleted() throws RuntimeException;
 }
