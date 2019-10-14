@@ -1,8 +1,5 @@
 package blockdude;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import blockdude.controller.BlockDudeController;
 import blockdude.controller.ClassicBlockDudeController;
 import blockdude.model.BlockDudeModel;
@@ -16,17 +13,6 @@ import blockdude.view.TextBasedBlockDudeView;
  * A class for running the Block Dude puzzle game.
  */
 public class BlockDude {
-  // the reason I'm using a map instead of a switch statement in the parseView() method is because
-  // it's easier to read and update - I think it's cleaner to have all the recognized keywords in
-  // one place at the top of the class, and better to simply add to a map than to update the parsing
-  // method every time I create a new view
-  private static Map<String, BlockDudeView> views = new HashMap<>();
-
-  static {
-    // map of view keys
-    views.put("text", new TextBasedBlockDudeView(System.in, System.out));
-  }
-
   /**
    * Main method for running the Block Dude game. Args should be of the structure: {"-source",
    * FILE_NAME, "-view", VIEW_TYPE} where FILE_NAME is the name of the file (including its .txt
@@ -129,10 +115,17 @@ public class BlockDude {
           throws IllegalArgumentException {
     requireHasMoreTokens(args, index, 1);
     index++;
+
+    BlockDudeView view;
     String viewName = args[index];
-    BlockDudeView view = views.get(viewName);
-    if (view == null)
-      throw new IllegalArgumentException("Token '" + viewName + "' could not be parsed as a view.");
+    switch (viewName) {
+      case "text":
+        view = new TextBasedBlockDudeView(System.in, System.out);
+        break;
+      default:
+        throw new IllegalArgumentException("Token '" + viewName + "' could not be parsed as a view.");
+    }
+
     config.view = view;
     index++;
     return index;
