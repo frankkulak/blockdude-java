@@ -20,10 +20,10 @@ public enum GamePiece {
   }
 
   /**
-   * Returns whether the given game piece is a player.
+   * Returns whether the given GamePiece is a player.
    *
-   * @param gp game piece to check
-   * @return true if game piece is a player, false otherwise
+   * @param gp GamePiece to check
+   * @return true if GamePiece is a player, false otherwise
    */
   public static boolean isPlayer(GamePiece gp) {
     GamePiece[] playerPieces = {PLAYER_LEFT, PLAYER_RIGHT};
@@ -31,8 +31,8 @@ public enum GamePiece {
   }
 
   /**
-   * Determines and returns whether the given GamePiece is solid. Solid GamePieces cannot be entered
-   * by the player, and they can also
+   * Determines and returns whether the given GamePiece is solid. A GamePiece is solid if it cannot
+   * be entered and will stop any game piece that falls on it.
    *
    * @param gp GamePiece that is being tested
    * @return true of given GamePiece is solid, false if it is not

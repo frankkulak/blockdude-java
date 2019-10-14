@@ -123,7 +123,7 @@ public class BlockDude {
         view = new TextBasedBlockDudeView(System.in, System.out);
         break;
       default:
-        throw new IllegalArgumentException("Token '" + viewName + "' could not be parsed as a view.");
+        throw new IllegalArgumentException("'" + viewName + "' could not be parsed as a view.");
     }
 
     config.view = view;

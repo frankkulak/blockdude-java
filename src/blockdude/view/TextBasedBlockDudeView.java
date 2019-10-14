@@ -35,9 +35,9 @@ public class TextBasedBlockDudeView implements BlockDudeView {
 
   @Override
   public void start(BlockDudeController controller) {
-    out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n- W = move" +
-            " up\n- S = put block down, pick block up\n- /pass: = try password (after :)\n- /rel" +
-            " = restart level\n- /reg = restart game\n- /quit = end game");
+    out.print("Welcome to Block Dude!\n\nControls:\n- A = move left\n- D = move right\n- W = mov" +
+            "e up\n- S = put block down, pick block up\n- /pass: = try password (after :)\n- /re" +
+            "l = restart level\n- /reg = restart game\n- /quit = end game");
 
     nextLine();
     controller.refreshView();

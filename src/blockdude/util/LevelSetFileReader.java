@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * A class for reading text files with level data.
+ * A class for reading text files with Block Dude level data.
  */
 public class LevelSetFileReader {
   /**

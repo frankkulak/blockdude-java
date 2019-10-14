@@ -36,9 +36,9 @@ public final class Position {
   }
 
   /**
-   * Returns new Position object with same col and row coordinates as this one.
+   * Returns a new position with the same col and row coordinates as this one.
    *
-   * @return new Position object with current col and row values
+   * @return new position with same col and row as this one
    */
   public Position copy() {
     return new Position(col, row);

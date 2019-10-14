@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a level of the Block Dude puzzle game.
+ * Represents a level of the Block Dude game.
  */
 public class Level {
   private final String password;
@@ -45,8 +45,8 @@ public class Level {
     if (player == null || playerPosition == null)
       throw new IllegalArgumentException("Player and its position cannot be null.");
 
-    // the invalid game states of the player position not being correct, having multiple players,
-    // and having players in doors at the start of a level, are all protected by the builder
+    // the invalid game states of the player position not being correct and having multiple players
+    // are both protected by the builder
 
     this.password = password;
     this.layout = layout;
@@ -149,9 +149,7 @@ public class Level {
    */
   public List<List<GamePiece>> layout() {
     // copying layout so that it cannot be manipulated externally
-    List<List<GamePiece>> layoutCopy = new ArrayList<>();
-    for (List<GamePiece> row : layout) layoutCopy.add(new ArrayList<>(row));
-    return layoutCopy;
+    return new ArrayList<>(layout);
   }
 
   /**
