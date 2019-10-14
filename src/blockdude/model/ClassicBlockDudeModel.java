@@ -274,6 +274,7 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   private boolean changePlayerDirection(Direction direction) {
     GamePiece playerBefore = player;
     player = getPlayerFromDirection(direction);
+    setGamePiece(playerPosition, player);
     return playerBefore != player;
   }
 
