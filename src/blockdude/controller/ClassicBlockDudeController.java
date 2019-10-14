@@ -90,16 +90,16 @@ public class ClassicBlockDudeController implements BlockDudeController {
 
     if (commandSuccessful) {
       refreshView();
-      boolean beatLastLevel = false;
-      if (model.isLevelCompleted()) beatLastLevel = !nextLevel();
-      if (beatLastLevel) view.displayMessage("Congrats! You beat this level set.");
+      if (model.isLevelCompleted() && !nextLevel()) {
+        view.displayMessage("Congrats! You beat this level set.");
+        handleCommand(Command.RESTART_GAME);
+      }
     } else {
       view.displayMessage(errorMessage);
     }
 
     commandArguments = null;
   }
-
 
   @Override
   public void refreshView() {
