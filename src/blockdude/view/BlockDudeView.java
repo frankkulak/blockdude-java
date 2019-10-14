@@ -1,18 +1,34 @@
 package blockdude.view;
 
-import blockdude.model.BlockDudeModel;
+import java.util.List;
 
-// FIXME: view will be updated after controller.. some code is hacky just to make controller function as i work on it
+import blockdude.controller.BlockDudeController;
+import blockdude.util.GamePiece;
 
 /**
- * Represents a view for the BlockDude game.
+ * Represents a view for the Block Dude game.
  */
 public interface BlockDudeView {
   /**
-   * Refreshes this view to display the current state of the given model.
+   * Starts this view, passing all read input to the given controller.
    *
-   * @param model model to refresh
-   * @throws IllegalStateException if model cannot be rendered
+   * @param controller controller to use for running the game
    */
-  void refresh(BlockDudeModel model, int levelIndex, String levelPassword) throws IllegalStateException; // fixme change to take in layout & level info
+  void start(BlockDudeController controller);
+
+  /**
+   * Refreshes this view to display the given information.
+   *
+   * @param layout        layout to display
+   * @param levelIndex    index of current level
+   * @param levelPassword password of current level
+   */
+  void refresh(List<List<GamePiece>> layout, int levelIndex, String levelPassword);
+
+  /**
+   * Displays a message to the user.
+   *
+   * @param message message to display
+   */
+  void displayMessage(String message);
 }

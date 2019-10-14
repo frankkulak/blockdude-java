@@ -1,5 +1,6 @@
 package blockdude.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import blockdude.util.GamePiece;
@@ -83,15 +84,19 @@ public class ClassicBlockDudeModel implements BlockDudeModel {
   }
 
   @Override
-  public GamePiece pieceHeldByPlayer() throws RuntimeException {
+  public List<List<GamePiece>> layoutToRender() throws RuntimeException {
     requireLevel();
-    return heldPiece;
-  }
 
-  @Override
-  public List<List<GamePiece>> layout() throws RuntimeException {
-    requireLevel();
-    return layout;
+    List<List<GamePiece>> layoutToRender = new ArrayList<>();
+    for (List<GamePiece> row : layout) layoutToRender.add(new ArrayList<>(row));
+
+    if (heldPiece != null) {
+      int row = playerPosition.row - 1;
+      int col = playerPosition.col;
+      layoutToRender.get(row).set(col, heldPiece);
+    }
+
+    return layoutToRender;
   }
 
   @Override

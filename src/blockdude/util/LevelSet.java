@@ -121,15 +121,13 @@ public class LevelSet {
   }
 
   /**
-   * Tries password on this level set; if password exists, returns level, if not, throws IAE.
+   * Returns the level in this level set with the given password, if it exists.
    *
    * @param password password to guess
-   * @return level with given password
-   * @throws IllegalArgumentException if no level has given password
+   * @return level with given password, if there is one, null otherwise
    */
-  public Level tryPassword(String password) throws IllegalArgumentException {
-    if (!passwords.containsKey(password))
-      throw new IllegalArgumentException("Level with password '" + password + "' does not exist.");
+  public Level tryPassword(String password) {
+    if (!passwords.containsKey(password)) return null;
     currentLevelIndex = passwords.get(password);
     return currentLevel();
   }

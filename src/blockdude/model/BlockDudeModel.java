@@ -62,20 +62,12 @@ public interface BlockDudeModel {
   boolean pickUpOrPutDown() throws RuntimeException;
 
   /**
-   * Returns the piece being held by the player, which may be null.
-   *
-   * @return piece that the player is holding
-   * @throws RuntimeException if no level has been loaded into model yet
-   */
-  GamePiece pieceHeldByPlayer() throws RuntimeException;
-
-  /**
-   * Returns current layout of this model.
+   * Returns list of list of game pieces representing the current state of the model.
    *
    * @return layout of model
    * @throws RuntimeException if no level has been loaded into model yet
    */
-  List<List<GamePiece>> layout() throws RuntimeException;
+  List<List<GamePiece>> layoutToRender() throws RuntimeException;
 
   /**
    * Returns whether the current level has been beat yet.

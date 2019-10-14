@@ -1,33 +1,34 @@
 package blockdude.controller;
 
+import blockdude.util.Command;
+import blockdude.util.CommandArguments;
+
 /**
  * Represents a controller for the Block Dude game.
  */
 public interface BlockDudeController {
   /**
-   * Handles user command and manipulates model accordingly.
-   *
-   * Valid commands (not case sensitive):
-   * - "A" to go left
-   * - "D" to go right
-   * - "W" to go up
-   * - "S" to either pick up or put down a block
-   * - "/reg" to restart game
-   * - "/rel" to restart level
-   * - "/pass X" to try a password
-   * - "/quit" to quit the game
-   *
-   * @param command string to direct how to change model
-   * @return whether or not command was successful
-   * @throws IllegalArgumentException if command not valid
-   * @throws IllegalStateException if something goes wrong and program needs to terminate
+   * Starts the game using this controller.
    */
-  boolean handleCommand(String command) throws IllegalArgumentException, IllegalStateException;
+  void start();
 
   /**
-   * TODO
+   * Sets this controller's command arguments to the given command arguments.
    *
-   * @throws RuntimeException todo
+   * @param args command arguments
    */
-  void start() throws RuntimeException;
+  void setCommandArguments(CommandArguments args);
+
+  /**
+   * Handles given command and updates the view if anything changed in the model.
+   *
+   * @param command command to execute
+   * @throws RuntimeException if something goes wrong and the program needs to terminate
+   */
+  void handleCommand(Command command) throws RuntimeException;
+
+  /**
+   * Refreshes the view.
+   */
+  void refreshView();
 }

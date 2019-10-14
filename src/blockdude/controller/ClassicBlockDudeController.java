@@ -1,6 +1,8 @@
 package blockdude.controller;
 
 import blockdude.model.BlockDudeModel;
+import blockdude.util.Command;
+import blockdude.util.CommandArguments;
 import blockdude.util.Level;
 import blockdude.util.LevelSet;
 import blockdude.view.BlockDudeView;
@@ -10,22 +12,22 @@ import blockdude.view.BlockDudeView;
  */
 public class ClassicBlockDudeController implements BlockDudeController {
   private final BlockDudeModel model;
-  private final LevelSet levels;
   private final BlockDudeView view;
+  private final LevelSet levels;
+  private CommandArguments commandArguments;
 
   /**
    * Constructs a new ClassicBlockDudeController using given model, view, and set of levels.
    *
    * @param model  model to control
-   * @param view   view for output
+   * @param view   view to use for output
    * @param levels levels to load into model
    * @throws IllegalArgumentException if given model, view, or level set are null
    */
   public ClassicBlockDudeController(BlockDudeModel model, BlockDudeView view, LevelSet levels)
           throws IllegalArgumentException {
-    if (model == null || levels == null || view == null) {
-      throw new IllegalArgumentException("Model, view, and levels must be non-null.");
-    }
+    if (model == null || levels == null || view == null)
+      throw new IllegalArgumentException("Model, view, and level set must be non-null.");
 
     model.loadLevel(levels.currentLevel());
     this.model = model;
@@ -33,112 +35,106 @@ public class ClassicBlockDudeController implements BlockDudeController {
     this.levels = levels;
   }
 
+  /* Interface methods -------------------------------------------------------------------------- */
+
   @Override
-  public boolean handleCommand(String command) throws IllegalArgumentException, IllegalStateException {
-    if (this.handleCommandHelper(command)) {
-      refreshView();
-      return true;
-    } else {
-      return false;
-    }
+  public void start() {
+    view.start(this);
   }
 
   @Override
-  public void start() throws RuntimeException {
-    refreshView();
+  public void setCommandArguments(CommandArguments args) {
+    commandArguments = args;
   }
+
+  @Override
+  public void handleCommand(Command command) throws RuntimeException {
+    boolean commandSuccessful;
+    String errorMessage = "Unspecified error.";
+
+    switch (command) {
+      case MOVE_LEFT:
+        commandSuccessful = model.moveLeft();
+        errorMessage = "Cannot move left.";
+        break;
+      case MOVE_RIGHT:
+        commandSuccessful = model.moveRight();
+        errorMessage = "Cannot move right.";
+        break;
+      case MOVE_UP:
+        commandSuccessful = model.moveUp();
+        errorMessage = "Cannot move up.";
+        break;
+      case PICK_UP_PUT_DOWN:
+        commandSuccessful = model.pickUpOrPutDown();
+        errorMessage = "Cannot pick up or put down.";
+        break;
+      case RESTART_LEVEL:
+        restartLevel();
+        commandSuccessful = true;
+        break;
+      case RESTART_GAME:
+        restartGame();
+        commandSuccessful = true;
+        break;
+      case QUIT:
+        throw new RuntimeException("Game ended by player.");
+      case TRY_PASSWORD:
+        commandSuccessful = tryPassword();
+        errorMessage = "Password not recognized.";
+        break;
+      default:
+        // this will never actually be thrown
+        throw new RuntimeException("Cannot handle null command.");
+    }
+
+    if (commandSuccessful) {
+      refreshView();
+      boolean beatLastLevel = false;
+      if (model.isLevelCompleted()) beatLastLevel = !nextLevel();
+      if (beatLastLevel) view.displayMessage("Congrats! You beat this level set.");
+    } else {
+      view.displayMessage(errorMessage);
+    }
+
+    commandArguments = null;
+  }
+
+
+  @Override
+  public void refreshView() {
+    int levelIndex = levels.currentLevelIndex();
+    String levelPassword = levels.currentLevel().password();
+    view.refresh(model.layoutToRender(), levelIndex, levelPassword);
+  }
+
+  /* Private methods ---------------------------------------------------------------------------- */
 
   /**
-   * Handles user command and manipulates model accordingly.
-   *
-   * @param command string to direct how to change model
-   * @return whether or not command was successful
-   * @throws IllegalArgumentException if command not valid
-   * @throws IllegalStateException    if something goes wrong and program needs to terminate
+   * Restarts the current level.
    */
-  private boolean handleCommandHelper(String command) throws IllegalArgumentException, IllegalStateException {
-    // fixme I know this is ugly, but commands will be used eventually
-    if (command.equalsIgnoreCase("A")) {
-      // move left
-      boolean result = this.model.moveLeft();
-      if (model.isLevelCompleted()) nextLevel();
-      return result;
-    } else if (command.equalsIgnoreCase("D")) {
-      // move right
-      boolean result = this.model.moveRight();
-      if (model.isLevelCompleted()) nextLevel();
-      return result;
-    } else if (command.equalsIgnoreCase("W")) {
-      // move up
-      boolean result = this.model.moveUp();
-      if (model.isLevelCompleted()) nextLevel();
-      return result;
-    } else if (command.equalsIgnoreCase("S")) {
-      // either put down or pick up
-      return this.model.pickUpOrPutDown();
-    } else if (command.equalsIgnoreCase("/reg")) {
-      // restart game
-      this.restartGame();
-      return true;
-    } else if (command.equalsIgnoreCase("/rel")) {
-      // restart level
-      this.restartLevel();
-      return true;
-    } else if (command.equalsIgnoreCase("/quit")) {
-      throw new IllegalStateException("Game ended by player.");
-    } else {
-      // try password (maybe?)
-      String[] passArr = command.split(":");
-      if (passArr.length == 2 && passArr[0].equalsIgnoreCase("/pass")) {
-        return this.tryLevelPassword(passArr[1]);
-      }
-    }
-
-    // if nothing returned and threw by now, there was no valid command
-    throw new IllegalArgumentException("Command \"" + command + "\" not recognized.");
+  private void restartLevel() {
+    model.restartLevel();
   }
 
   /**
    * Restarts the game from the first level.
    */
   private void restartGame() {
-    this.levels.restart();
-    this.model.loadLevel(this.levels.currentLevel());
+    levels.restart();
+    model.loadLevel(levels.currentLevel());
   }
 
   /**
-   * Restarts the current level.
-   */
-  private void restartLevel() {
-    this.model.restartLevel();
-  }
-
-  /**
-   * Tries given password to see if it unlocks some level, if so, skips to that level.
+   * Goes to next level, if there is one.
    *
-   * @param password password to try
-   * @return boolean for whether level was successfully unlocked with password
-   */
-  private boolean tryLevelPassword(String password) {
-    try {
-      Level level = this.levels.tryPassword(password);
-      this.model.loadLevel(level);
-      return true;
-    } catch (IllegalArgumentException e) {
-      // no level has the given password, return false
-      return false;
-    }
-  }
-
-  /**
-   * Goes to next level, if there is a next level, and returns boolean for whether or not it could.
-   *
-   * @return whether or not level could be advanced
+   * @return true if could advance to next level, false otherwise.
    */
   private boolean nextLevel() {
     try {
-      Level nextLevel = this.levels.nextLevel();
-      this.model.loadLevel(nextLevel);
+      Level nextLevel = levels.nextLevel();
+      model.loadLevel(nextLevel);
+      refreshView();
       return true;
     } catch (IllegalStateException e) {
       // there is no next level, return false
@@ -147,9 +143,23 @@ public class ClassicBlockDudeController implements BlockDudeController {
   }
 
   /**
-   * TODO
+   * Tries the password that is currently in the command arguments.
+   *
+   * @return true if level successfully loaded from password, false otherwise
+   * @throws RuntimeException if command arguments are invalid
    */
-  private void refreshView() {
-    view.refresh(model, levels.currentLevelIndex(), levels.currentLevel().password());
+  private boolean tryPassword() throws RuntimeException {
+    try {
+      String password = commandArguments.passwordToTry;
+      Level levelToLoad = levels.tryPassword(password);
+      model.loadLevel(levelToLoad);
+      return true;
+    } catch (NullPointerException | IndexOutOfBoundsException e) {
+      // commandArguments hasn't been updated
+      throw new RuntimeException("Tried to guess password without specifying password.");
+    } catch (IllegalArgumentException e) {
+      // password doesn't match any levels in the level set
+      return false;
+    }
   }
 }

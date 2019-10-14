@@ -2,7 +2,6 @@ package blockdude;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import blockdude.controller.BlockDudeController;
 import blockdude.controller.ClassicBlockDudeController;
@@ -25,7 +24,7 @@ public class BlockDude {
 
   static {
     // map of view keys
-    views.put("text", new TextBasedBlockDudeView(System.out));
+    views.put("text", new TextBasedBlockDudeView(System.in, System.out));
   }
 
   /**
@@ -48,37 +47,8 @@ public class BlockDude {
    * @param config configurations to use for the game
    */
   private static void runGame(BlockDudeConfigurations config) {
-    BlockDudeModel model = config.model;
-    BlockDudeView view = config.view;
     BlockDudeController controller = config.controller;
-
-    // fixme - clean up below code, right now this only works for text view, and this code should not be here
-
-    // show game for first time
     controller.start();
-    System.out.print("\n\n");
-
-    // playing the game
-    String exitMessage;
-    Scanner scan = new Scanner(System.in);
-    while (true) {
-      try {
-        if (controller.handleCommand(scan.next())) { // fixme change output to know why true/false so there is msg to disp
-          System.out.print("\n\n");
-        } else {
-          System.out.print("Invalid move.\n\n");
-        }
-      } catch (IllegalArgumentException iae) {
-        System.out.print(iae.getMessage() + "\n\n");
-      } catch (IllegalStateException ise) {
-        // ISE is a sign from the controller that the game must end
-        exitMessage = ise.getMessage();
-        break;
-      }
-    }
-
-    // ending game message
-    System.out.print("\nGame ended with message: " + exitMessage);
   }
 
   /* Parsing game configurations ---------------------------------------------------------------- */

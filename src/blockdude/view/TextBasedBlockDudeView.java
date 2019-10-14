@@ -1,93 +1,107 @@
 package blockdude.view;
 
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
+import java.util.Scanner;
 
-import blockdude.model.BlockDudeModel;
+import blockdude.controller.BlockDudeController;
+import blockdude.util.Command;
+import blockdude.util.CommandArguments;
 import blockdude.util.GamePiece;
 
-// FIXME: view will be updated after controller.. some code is hacky just to make controller function as i work on it
-
 /**
- * Represents a simple text-based view for the BlockDude game. Intended for use with the console.
+ * Represents a simple text-based view for the Block Dude game. Intended for use with the console.
  */
 public class TextBasedBlockDudeView implements BlockDudeView {
+  private InputStream in;
   private PrintStream out;
-  private boolean hasRendered;
 
   /**
-   * Constructs new TextBasedBlockDudeView that outputs to given PrintStream.
+   * Constructs new TextBasedBlockDudeView using given InputStream and PrintStream for I/O.
    *
-   * @param out PrintStream to output to
-   * @throws IllegalArgumentException if given PrintStream is null
+   * @param in  InputStream to read from
+   * @param out PrintStream to write to
+   * @throws IllegalArgumentException if either argument is null
    */
-  public TextBasedBlockDudeView(PrintStream out) throws IllegalArgumentException {
-    if (out == null) {
-      throw new IllegalArgumentException("PrintStream must be non-null.");
-    }
+  public TextBasedBlockDudeView(InputStream in, PrintStream out) throws IllegalArgumentException {
+    if (in == null || out == null) throw new IllegalArgumentException("I/O must be non-null.");
 
+    this.in = in;
     this.out = out;
-    hasRendered = false;
+  }
+
+  /* Interface methods -------------------------------------------------------------------------- */
+
+  @Override
+  public void start(BlockDudeController controller) {
+    out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n- W = move" +
+            " up\n- S = put block down, pick block up\n- /pass: = try password (after :)\n- /rel" +
+            " = restart level\n- /reg = restart game\n- /quit = end game");
+
+    nextLine();
+    controller.refreshView();
+
+    Scanner scan = new Scanner(in);
+    while (true) {
+      try {
+        parseCommand(controller, scan.next());
+      } catch (IllegalArgumentException e) {
+        // the command was either not valid or not recognized
+        displayMessage(e.getMessage());
+      } catch (RuntimeException e) {
+        // something went wrong and the game needs to terminate
+        displayMessage(e.getMessage());
+        break;
+      }
+    }
   }
 
   @Override
-  public void refresh(BlockDudeModel model, int levelIndex, String levelPassword) throws IllegalStateException {
-    if (!hasRendered) {
-      System.out.print("Welcome to BlockDude!\n\nControls:\n- A = move left\n- D = move right\n- " +
-              "W = move up\n- S = put block down, pick block up\n- /pass: = try password (after :" +
-              ")\n- /rel = restart level\n- /reg = restart game\n- /quit = end game\n\n");
-      hasRendered = true;
-    }
-
-    // fixme the way a player holding a block is rendered physically pains me
-    // fixme this method is so ugly i am so sorry to whoever is reading this
+  public void refresh(List<List<GamePiece>> layout, int levelIndex, String levelPassword) {
     StringBuilder outputString = new StringBuilder();
 
     outputString.append("Level ").append(levelIndexString(levelIndex));
     outputString.append(" (password: ").append(levelPassword).append(")\n\n");
 
-    List<List<GamePiece>> layout = model.layout();
-
-    // iterating through rows of layout
-    for (int i = 0; i < layout.size(); i++) {
-      // finding current row
-      List<GamePiece> row = layout.get(i);
-
-      // iterating through column of row
-      for (int j = 0; j < row.size(); j++) {
-        // check if on last row, if not, then check if player is below and has block
-        if (i != layout.size() - 1) {
-          GamePiece pieceBelow = layout.get(i + 1).get(j);
-          if (GamePiece.isPlayer(pieceBelow) && (model.pieceHeldByPlayer() != null)) {
-            outputString.append(charFor(model.pieceHeldByPlayer()));
-          } else {
-            outputString.append(charFor(layout.get(i).get(j)));
-          }
-        } else {
-          // just add piece to output
-          outputString.append(charFor(layout.get(i).get(j)));
-        }
-      }
-
-      // add new line to outputString for all but last row
-      outputString.append((i != layout.size() - 1 ? "\n" : ""));
+    int rowIndex = 0;
+    for (List<GamePiece> row : layout) {
+      for (GamePiece piece : row) outputString.append(charFor(piece));
+      rowIndex++;
+      if (rowIndex < layout.size()) outputString.append('\n');
     }
 
-    // rendering output string
-    this.out.print(outputString.toString());
+    out.print(outputString.toString());
+    nextLine();
   }
+
+  @Override
+  public void displayMessage(String message) {
+    out.print(message);
+    nextLine();
+  }
+
+  /* Private methods ---------------------------------------------------------------------------- */
+
+  /**
+   * Prints two newline characters.
+   */
+  private void nextLine() {
+    out.print("\n\n");
+  }
+
+  /* Static methods ----------------------------------------------------------------------------- */
 
   /**
    * Determines and returns character to use to represent given GamePiece.
    *
    * @param gp GamePiece to find char for
    * @return char representing given GamePiece
-   * @throws IllegalArgumentException if given GamePiece is null / cannot be rendered
+   * @throws RuntimeException if given GamePiece is null / cannot be rendered
    */
-  private char charFor(GamePiece gp) throws IllegalArgumentException {
+  private static char charFor(GamePiece gp) throws RuntimeException {
     switch (gp) {
       case EMPTY:
-        // return '\u00B7'; // middle dot
         return ' ';
       case PLAYER_LEFT:
         return '<';
@@ -100,8 +114,56 @@ public class TextBasedBlockDudeView implements BlockDudeView {
       case DOOR:
         return 'Π';
       default:
-        throw new IllegalArgumentException("Given GamePiece cannot be rendered.");
+        throw new RuntimeException("Given GamePiece cannot be rendered.");
     }
+  }
+
+  /**
+   * Parses the given string as a command and executes it on the given controller.
+   *
+   * @param controller    controller to execute command on
+   * @param commandString string to parse as command
+   * @throws IllegalArgumentException if command could not be parsed
+   */
+  private void parseCommand(BlockDudeController controller, String commandString)
+          throws IllegalArgumentException {
+    String commandStringUC = commandString.toUpperCase();
+    Command command;
+
+    switch (commandStringUC) {
+      case "W":
+        command = Command.MOVE_UP;
+        break;
+      case "A":
+        command = Command.MOVE_LEFT;
+        break;
+      case "S":
+        command = Command.PICK_UP_PUT_DOWN;
+        break;
+      case "D":
+        command = Command.MOVE_RIGHT;
+        break;
+      case "/REL":
+        command = Command.RESTART_LEVEL;
+        break;
+      case "/REG":
+        command = Command.RESTART_GAME;
+        break;
+      case "/QUIT":
+        command = Command.QUIT;
+        break;
+      default:
+        if (!commandStringUC.startsWith("/PASS:") || commandString.length() < 7)
+          throw new IllegalArgumentException("Command '" + commandString + "' not recognized.");
+        String password = commandString.split(":")[1];
+        CommandArguments args = new CommandArguments();
+        args.passwordToTry = password;
+        controller.setCommandArguments(args);
+        command = Command.TRY_PASSWORD;
+        break;
+    }
+
+    controller.handleCommand(command);
   }
 
   /**
