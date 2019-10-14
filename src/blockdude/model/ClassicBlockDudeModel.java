@@ -10,11 +10,13 @@ import blockdude.util.Position;
  * Represents the classic Block Dude game model.
  */
 public class ClassicBlockDudeModel implements BlockDudeModel {
-  private Level level; // INVARIANT: never null once set
-  private GamePiece player; // INVARIANT: will be one of PLAYER_LEFT, PLAYER_RIGHT, PLAYER_DOOR
-  private GamePiece heldPiece; // might be null if player is not holding a piece
+  // INVARIANT: below chunk of fields will never be null once set
+  private Level level;
+  private GamePiece player; // INVARIANT: either PLAYER_LEFT or PLAYER_RIGHT
   private Position playerPosition; // INVARIANT: never has coors beyond limits of board
-  private List<List<GamePiece>> layout; // INVARIANT: never null, correct for stored level
+  private List<List<GamePiece>> layout; // INVARIANT: correct for current level
+
+  private GamePiece heldPiece;
   private boolean doorReached;
 
   private enum Direction { LEFT, RIGHT }

@@ -78,10 +78,10 @@ public interface BlockDudeModel {
   List<List<GamePiece>> layout() throws RuntimeException;
 
   /**
-   * TODO
+   * Returns whether the current level has been beat yet.
    *
-   * @return todo
-   * @throws RuntimeException todo
+   * @return true if current level has been beat, false otherwise
+   * @throws RuntimeException if no level has been loaded into model yet
    */
   boolean isLevelCompleted() throws RuntimeException;
 }
