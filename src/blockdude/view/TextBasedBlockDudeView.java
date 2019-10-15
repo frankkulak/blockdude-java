@@ -11,7 +11,7 @@ import blockdude.util.CommandArguments;
 import blockdude.util.GamePiece;
 
 /**
- * Represents a simple text-based view for the Block Dude game. Intended for use with the console.
+ * A text-based view for the Block Dude game (intended for use with the console).
  */
 public class TextBasedBlockDudeView implements BlockDudeView {
   private InputStream in;

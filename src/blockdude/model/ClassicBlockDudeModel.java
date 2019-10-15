@@ -8,7 +8,7 @@ import blockdude.util.Level;
 import blockdude.util.Position;
 
 /**
- * Represents the classic Block Dude game model.
+ * A classic model for the Block Dude game.
  */
 public class ClassicBlockDudeModel implements BlockDudeModel {
   // INVARIANT: below chunk of fields will never be null once set

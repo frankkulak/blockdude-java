@@ -8,7 +8,7 @@ import blockdude.util.LevelSet;
 import blockdude.view.BlockDudeView;
 
 /**
- * Represents a generic controller for the classic BlockDude game.
+ * A classic controller for the Block Dude game.
  */
 public class ClassicBlockDudeController implements BlockDudeController {
   private final BlockDudeModel model;
