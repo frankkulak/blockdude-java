@@ -1,5 +1,8 @@
 package blockdude;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+
 import blockdude.controller.BlockDudeController;
 import blockdude.controller.ClassicBlockDudeController;
 import blockdude.model.BlockDudeModel;
@@ -97,8 +100,14 @@ public class BlockDude {
     requireHasMoreTokens(args, index, 1);
     index++;
     String filename = "levelSources/" + args[index];
-    // may throw either IAE or ISE - do not catch
-    config.levels = LevelSetFileReader.parseLevelSetFile(filename);
+
+    try {
+      // may throw either IAE or ISE - do not catch
+      config.levels =  LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
+    } catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("No file named " + filename + " found.");
+    }
+
     return index + 1;
   }
 

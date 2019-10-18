@@ -1,7 +1,5 @@
 package blockdude.util;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.Objects;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -11,30 +9,13 @@ import java.util.regex.Pattern;
  */
 public class LevelSetFileReader {
   /**
-   * Parses file with given name to generate level set for use in game.
-   *
-   * @param filename name of file to parse
-   * @return level set created from input file
-   * @throws IllegalArgumentException if file could not be found
-   * @throws IllegalStateException    if file could not be parsed as level set
-   */
-  public static LevelSet parseLevelSetFile(String filename)
-          throws IllegalArgumentException, IllegalStateException {
-    try {
-      return LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
-    } catch (FileNotFoundException e) {
-      throw new IllegalArgumentException("No file named " + filename + " found.");
-    }
-  }
-
-  /**
    * Parses file to generate level set for use in game.
    *
-   * @param readable txt file to read from
+   * @param readable file to read from
    * @return level set generated from file
    * @throws IllegalStateException if file could not be parsed as level set
    */
-  private static LevelSet parseLevelSetFile(Readable readable) throws IllegalStateException {
+  public static LevelSet parseLevelSetFile(Readable readable) throws IllegalStateException {
     Objects.requireNonNull(readable, "Must have non-null readable source.");
     Scanner scan = new Scanner(readable);
     scan.useDelimiter(Pattern.compile("(\\p{Space}+|#.*)+"));
