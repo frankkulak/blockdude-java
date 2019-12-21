@@ -56,7 +56,7 @@ public class Level {
 
   /**
    * Builder for creating a Level. Access is package private since Levels should only ever be
-   * created by a LevelSetFileReader.
+   * created by a LevelSetReader.
    */
   static class Builder {
     private String password;

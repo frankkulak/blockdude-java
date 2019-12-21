@@ -5,17 +5,17 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * A class for reading text files with Block Dude level data.
+ * A class for reading Block Dude level data.
  */
-public class LevelSetFileReader {
+public class LevelSetReader {
   /**
-   * Parses file to generate level set for use in game.
+   * Parses LevelSet from given Readable.
    *
-   * @param readable file to read from
-   * @return level set generated from file
-   * @throws IllegalStateException if file could not be parsed as level set
+   * @param readable object to read level data from
+   * @return LevelSet parsed from Readable
+   * @throws IllegalStateException if Readable could not be parsed as LevelSet
    */
-  public static LevelSet parseLevelSetFile(Readable readable) throws IllegalStateException {
+  public static LevelSet parseLevelSet(Readable readable) throws IllegalStateException {
     Objects.requireNonNull(readable, "Must have non-null readable source.");
     Scanner scan = new Scanner(readable);
     scan.useDelimiter(Pattern.compile("(\\p{Space}+|#.*)+"));

@@ -12,7 +12,7 @@ import blockdude.model.ClassicBlockDudeModel;
 import blockdude.util.GamePiece;
 import blockdude.util.Level;
 import blockdude.util.LevelSet;
-import blockdude.util.LevelSetFileReader;
+import blockdude.util.LevelSetReader;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -30,7 +30,7 @@ public class ModelTests {
   public static void onlyOnce() {
     try {
       String filename = "levelSources/levels.txt";
-      levels = LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
+      levels = LevelSetReader.parseLevelSet(new FileReader(filename));
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("File name is incorrect.");
     }
@@ -2071,7 +2071,7 @@ public class ModelTests {
    */
   private static Level levelFromString(String levelString) throws IllegalStateException {
     StringReader stringReader = new StringReader(levelString);
-    LevelSet levels = LevelSetFileReader.parseLevelSetFile(stringReader);
+    LevelSet levels = LevelSetReader.parseLevelSet(stringReader);
     return levels.currentLevel();
   }
 

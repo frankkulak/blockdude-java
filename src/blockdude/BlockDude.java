@@ -8,7 +8,7 @@ import blockdude.controller.ClassicBlockDudeController;
 import blockdude.model.BlockDudeModel;
 import blockdude.model.ClassicBlockDudeModel;
 import blockdude.util.LevelSet;
-import blockdude.util.LevelSetFileReader;
+import blockdude.util.LevelSetReader;
 import blockdude.view.BlockDudeView;
 import blockdude.view.TextBasedBlockDudeView;
 
@@ -103,7 +103,7 @@ public class BlockDude {
 
     try {
       // may throw either IAE or ISE - do not catch
-      config.levels =  LevelSetFileReader.parseLevelSetFile(new FileReader(filename));
+      config.levels =  LevelSetReader.parseLevelSet(new FileReader(filename));
     } catch (FileNotFoundException e) {
       throw new IllegalArgumentException("No file named " + filename + " found.");
     }

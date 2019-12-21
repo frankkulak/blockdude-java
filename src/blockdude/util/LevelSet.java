@@ -30,7 +30,7 @@ public class LevelSet {
 
   /**
    * Class for building LevelSets. Access is package private since LevelSets should only ever be
-   * created by a LevelSetFileReader.
+   * created by a LevelSetReader.
    */
   static class Builder {
     private final List<Level> levels;
