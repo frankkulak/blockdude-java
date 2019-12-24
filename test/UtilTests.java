@@ -1,6 +1,16 @@
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import blockdude.util.GamePiece;
+import blockdude.util.Level;
+import blockdude.util.LevelSet;
+import blockdude.util.LevelSetReader;
 import blockdude.util.Position;
 
 import static org.junit.Assert.assertEquals;
@@ -14,6 +24,23 @@ import static org.junit.Assert.assertTrue;
  * A class for testing members of the util package.
  */
 public class UtilTests {
+  private static LevelSet levels;
+
+  @BeforeClass
+  public static void onlyOnce() {
+    try {
+      String filename = "levelSources/levels.txt";
+      levels = LevelSetReader.parseLevelSet(new FileReader(filename));
+    } catch (FileNotFoundException e) {
+      throw new IllegalArgumentException("File name is incorrect.");
+    }
+  }
+
+  @Before
+  public void setUp() {
+    levels.restart();
+  }
+
   /* GamePiece Tests ---------------------------------------------------------------------------- */
 
   // Examples for use in tests
@@ -24,10 +51,6 @@ public class UtilTests {
   private final GamePiece leftPlayer = GamePiece.PLAYER_LEFT;
   private final GamePiece rightPlayer = GamePiece.PLAYER_RIGHT;
 
-  /**
-   * Tests that canPickUp(...) returns true when given a piece that can be picked up, and false when
-   * given a piece that cannot be picked up or when given null.
-   */
   @Test
   public void gamePieceCanPickUpWorks() {
     GamePiece[] piecesThatCanBePickedUp = {block};
@@ -39,10 +62,6 @@ public class UtilTests {
     assertFalse(GamePiece.canPickUp(null));
   }
 
-  /**
-   * Tests that isPlayer(...) returns true when given a piece that is a player, and false when given
-   * a piece that is not a player or when given null.
-   */
   @Test
   public void gamePieceIsPlayerWorks() {
     GamePiece[] piecesThatArePlayers = {leftPlayer, rightPlayer};
@@ -54,10 +73,6 @@ public class UtilTests {
     assertFalse(GamePiece.isPlayer(null));
   }
 
-  /**
-   * Tests that isSolid(...) returns true when given a piece that is solid, and false when given a
-   * piece that is not solid or when given null.
-   */
   @Test
   public void gamePieceIsSolidWorks() {
     GamePiece[] piecesThatAreSolid = {leftPlayer, rightPlayer, wall, block};
@@ -71,266 +86,177 @@ public class UtilTests {
 
   /* Level Tests -------------------------------------------------------------------------------- */
 
-  /**
-   * Tests that a Level can be built correctly.
-   */
+  // There are no tests for Level.Builder in this section since it is not public; it is tested as
+  // part of the tests for LevelSetReader, since LevelSetReader depends on Level.Builder
+
   @Test
-  public void buildingLevelWorks() {
-    // todo impl
+  public void levelPasswordReturnsCorrectValue() {
+    Level firstLevel = levels.currentLevel();
+    assertEquals("tcP", firstLevel.password());
+    Level secondLevel = levels.nextLevel();
+    assertEquals("ARo", secondLevel.password());
+    Level lastLevel = levels.tryPassword("wTF");
+    assertEquals("wTF", lastLevel.password());
   }
 
-  /**
-   * Tests that an IllegalStateException is thrown when building a level with a password that is
-   * either null or empty.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelThrowsWhenPasswordNullOrEmpty() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level that did not have any rows
-   * or game pieces added to it.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelThrowsWhenLayoutEmpty() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level that does not have a
-   * rectangular layout (not all the rows are the same length).
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelThrowsWhenLayoutIsNotRectangle() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level with no player.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelThrowsWhenNoPlayerDefined() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level with more than one player.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelThrowsWhenMoreThanOnePlayerDefined() {
-    // todo impl
-  }
-
-  /**
-   * Tests that password() returns the correct password for the level.
-   */
-  @Test
-  public void levelPasswordWorks() {
-    // todo impl
-  }
-
-  /**
-   * Tests that layout() returns the correct layout for the initial state of the level.
-   */
   @Test
   public void levelLayoutReturnsCorrectValue() {
-    // todo impl
+    Level level = levels.currentLevel();
+    List<List<GamePiece>> layout = level.layout();
+
+    for (int rowIndex = 0; rowIndex < layout.size(); rowIndex++) {
+      List<GamePiece> row = layout.get(rowIndex);
+      for (int colIndex = 0; colIndex < row.size(); colIndex++) {
+        GamePiece gp = layout.get(rowIndex).get(colIndex);
+        if (colIndex == 0 || colIndex == row.size() - 1) {
+          assertEquals(GamePiece.WALL, gp);
+        } else if (rowIndex < 3) {
+          assertEquals(GamePiece.EMPTY, gp);
+        } else if (rowIndex == 3) {
+          if (colIndex == 4 || colIndex == 12) {
+            assertEquals(GamePiece.WALL, gp);
+          } else {
+            assertEquals(GamePiece.EMPTY, gp);
+          }
+        } else if (rowIndex == 4) {
+          if (colIndex == 1) {
+            assertEquals(GamePiece.DOOR, gp);
+          } else if (colIndex == 4 || colIndex == 8 || colIndex == 12) {
+            assertEquals(GamePiece.WALL, gp);
+          } else if (colIndex == 10 || colIndex == 14) {
+            assertEquals(GamePiece.BLOCK, gp);
+          } else if (colIndex == 16) {
+            assertEquals(GamePiece.PLAYER_RIGHT, gp);
+          } else {
+            assertEquals(GamePiece.EMPTY, gp);
+          }
+        } else {
+          assertEquals(GamePiece.WALL, gp);
+        }
+      }
+    }
   }
 
-  /**
-   * Tests that the level layout cannot be mutated via the object output by layout().
-   */
   @Test
   public void levelLayoutCannotBeMutated() {
-    // todo impl
+    Level level = levels.currentLevel();
+    List<List<GamePiece>> layout = level.layout();
+    assertEquals(layout.get(0).get(0), level.layout().get(0).get(0));
+    layout.get(0).set(0, GamePiece.BLOCK);
+    assertNotEquals(layout.get(0).get(0), level.layout().get(0).get(0));
   }
 
-  /**
-   * Tests that player() returns the correct player for the initial state of the level.
-   */
   @Test
-  public void levelPlayerWorks() {
-    // todo impl
+  public void levelPlayerReturnsCorrectValue() {
+    Level level = levels.currentLevel();
+    assertEquals(GamePiece.PLAYER_RIGHT, level.player());
+    // no levels start with PLAYER_LEFT
   }
 
-  /**
-   * Tests that playerPosition() returns the correct position for the initial state of the level.
-   */
   @Test
   public void levelPlayerPositionReturnsCorrectValue() {
-    // todo impl
+    Level level = levels.currentLevel();
+    assertEquals(new Position(16, 4), level.playerPosition());
+    Level nextLevel = levels.nextLevel();
+    assertEquals(new Position(18, 6), nextLevel.playerPosition());
   }
 
-  /**
-   * Tests that the player position cannot be mutated via the object output by playerPosition().
-   */
   @Test
   public void levelPlayerPositionCannotBeMutated() {
-    // todo impl
+    Level level = levels.currentLevel();
+    Position playerPosition = level.playerPosition();
+    assertEquals(new Position(16, 4), playerPosition);
+    playerPosition.row = 5;
+    assertEquals(new Position(16, 5), playerPosition);
+    assertEquals(new Position(16, 4), level.playerPosition());
+    playerPosition.col = 5;
+    assertEquals(new Position(5, 5), playerPosition);
+    assertEquals(new Position(16, 4), level.playerPosition());
   }
 
   /* LevelSet Tests ----------------------------------------------------------------------------- */
 
-  /**
-   * Tests that a LevelSet can be built correctly.
-   */
-  @Test
-  public void buildingLevelSetWorks() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level set without any levels.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelSetThrowsWhenNoLevelsAdded() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level set with a null level.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelSetThrowsWhenNullLevelAdded() {
-    // todo impl
-  }
-
-  /**
-   * Tests that an IllegalStateException is thrown when building a level set that has multiple
-   * levels with the same password.
-   */
-  @Test (expected = IllegalStateException.class)
-  public void buildingLevelSetThrowsWhenLevelsWithSamePasswordAreAdded() {
-    // todo impl
-  }
-
-  /**
-   * Tests that currentLevel() returns the correct level for the state of the level set.
-   */
+  // There are no tests for LevelSet.Builder in this section since it is not public; it is tested as
+  // part of the tests for LevelSetReader, since LevelSetReader depends on LevelSet.Builder
+  
   @Test
   public void levelSetCurrentLevelWorks() {
     // todo
   }
 
-  /**
-   * Tests that currentLevelIndex() returns the correct index for the state of the level set.
-   */
   @Test
   public void levelSetCurrentLevelIndexWorks() {
     // todo
   }
 
-  /**
-   * Tests that nextLevel() returns the correct next level from the level set.
-   */
   @Test
   public void levelSetNextLevelReturnsCorrectLevel() {
     // todo
   }
 
-  /**
-   * Tests that nextLevel() changes the current level of the level set.
-   */
   @Test
   public void levelSetNextLevelChangesCurrentLevelCorrectly() {
     // todo
   }
 
-  /**
-   * Tests that restart() sets the current level index to 0.
-   */
   @Test
   public void levelSetRestartSetsLevelIndexToZero() {
     // todo
   }
 
-  /**
-   * Tests that restart() sets the current level to be the first level of this level set.
-   */
   @Test
   public void levelSetRestartSetsCurrentLevelToFirstLevel() {
     // todo
   }
 
-  /**
-   * Tests that tryPassword(...) returns the correct level for the given password.
-   */
   @Test
   public void levelSetTryPasswordReturnsCorrectLevel() {
     // todo
   }
 
-  /**
-   * Tests that tryPassword(...) sets the level index correctly for the given password.
-   */
   @Test
   public void levelSetTryPasswordSetsLevelIndexCorrectly() {
     // todo
   }
 
-  /**
-   * Tests that tryPassword(...) sets the current level correctly for the given password.
-   */
   @Test
   public void levelSetTryPasswordSetsCurrentLevelCorrectly() {
     // todo
   }
 
-  /**
-   * Tests that tryPassword(...) returns null when given an incorrect password.
-   */
   @Test
   public void levelSetTryPasswordThatDoesNotExistReturnsNull() {
     // todo
   }
 
-  /* LevelSetFileReader Tests ------------------------------------------------------------------- */
+  /* LevelSetReader Tests ------------------------------------------------------------------- */
 
-  /**
-   * TODO
-   */
   @Test
   public void levelSetFileReaderParsesFileWithOneLevelCorrectly() {
     // todo
   }
 
-  /**
-   * TODO
-   */
   @Test
   public void levelSetFileReaderParsesFileWithMoreThanOneLevelCorrectly() {
     // todo
   }
 
-  /**
-   * TODO
-   */
-  @Test (expected = IllegalArgumentException.class)
+  @Test(expected = IllegalArgumentException.class)
   public void levelSetFileReaderThrowsIAEForNullArgument() {
     // todo
   }
 
-  /**
-   * TODO
-   */
-  @Test (expected = IllegalStateException.class)
+  @Test(expected = IllegalStateException.class)
   public void levelSetFileReaderThrowsISEForEmptyFile() {
     // todo
   }
 
-  /**
-   * TODO
-   */
-  @Test (expected = IllegalStateException.class)
+  @Test(expected = IllegalStateException.class)
   public void levelSetFileReaderThrowsISEForFileWithIncorrectSyntax() {
     // todo
   }
 
-  /**
-   * TODO
-   */
-  @Test (expected = IllegalStateException.class)
+  @Test(expected = IllegalStateException.class)
   public void levelSetFileReaderThrowsISEForFileWithIncorrectLevelFormat() {
     // todo repeat tests for level builder
   }
@@ -349,9 +275,6 @@ public class UtilTests {
   private final Position posPOSxNEG = new Position(4, -4);
   private final Position posNEGxNEG = new Position(-4, -4);
 
-  /**
-   * Tests that a Position can be correctly constructed.
-   */
   @Test
   public void makePositionWorks() {
     Position pos = new Position(1, 2);
@@ -360,94 +283,52 @@ public class UtilTests {
     assertEquals(2, pos.row);
   }
 
-  /**
-   * Tests that equals(...) returns true only when two positions have the same row and col values.
-   */
   @Test
   public void positionEqualsWorks() {
-    // equal when same objects
     assertEquals(pos0x0, pos0x0); // zero
     assertEquals(pos5x5, pos5x5); // row == col
     assertEquals(pos5x7, pos5x7); // row != col
     assertEquals(posMAXxMAX, posMAXxMAX); // large
-
-    // equal when col same, row same
     assertEquals(pos5x3_1, pos5x3_2);
-
-    // not equal when col dif, row same
     assertNotEquals(posPOSxNEG, posNEGxNEG);
-
-    // not equal when col same, row dif
     assertNotEquals(pos5x5, pos5x7);
-
-    // not equal when col and row dif
     assertNotEquals(pos0x0, pos5x7);
-
-    // not equal when col and row flipped
     assertNotEquals(pos5x7, pos7x5);
-
-    // not equal to null
     assertNotEquals(null, pos0x0);
     assertNotEquals(null, pos5x5);
     assertNotEquals(null, pos5x7);
   }
 
-  /**
-   * Tests that hashCode() returns the same value when called on equal objects.
-   */
   @Test
   public void positionHashCodeWorks() {
-    // same objects
     assertEquals(pos0x0.hashCode(), pos0x0.hashCode());
     assertEquals(pos5x5.hashCode(), pos5x5.hashCode());
     assertEquals(posMAXxMAX.hashCode(), posMAXxMAX.hashCode());
-
-    // different objects, but equal
     assertNotSame(pos5x3_1, pos5x3_2);
     assertEquals(pos5x3_1, pos5x3_2);
     assertEquals(pos5x3_1.hashCode(), pos5x3_2.hashCode());
   }
 
-  /**
-   * Tests that toString() returns a String in the format "(col,row)".
-   */
   @Test
   public void positionToStringWorks() {
-    // zero
     assertEquals("(0,0)", pos0x0.toString());
-
-    // positive
     assertEquals("(5,7)", pos5x7.toString());
-
-    // negative
     assertEquals("(-4,4)", posNEGxPOS.toString());
-
-    // max
     String maxPosExpected = "(" + Integer.MAX_VALUE + "," + Integer.MAX_VALUE + ")";
     assertEquals(maxPosExpected, posMAXxMAX.toString());
   }
 
-  /**
-   * Tests that copy() returns a different position object that has the same row and col.
-   */
   @Test
   public void positionCopyWorks() {
-    // zero
     Position pos0x0Copy = pos0x0.copy();
     assertNotSame(pos0x0, pos0x0Copy);
     assertEquals(pos0x0, pos0x0Copy);
-
-    // positive
     Position pos5x7Copy = pos5x7.copy();
     assertNotSame(pos5x7, pos5x7Copy);
     assertEquals(pos5x7, pos5x7Copy);
-
-    // negative
     Position posNEGxNEGCopy = posNEGxNEG.copy();
     assertNotSame(posNEGxNEG, posNEGxNEGCopy);
     assertEquals(posNEGxNEG, posNEGxNEGCopy);
-
-    // max
     Position posMAXxMAXCopy = posMAXxMAX.copy();
     assertNotSame(posMAXxMAX, posMAXxMAXCopy);
     assertEquals(posMAXxMAX, posMAXxMAXCopy);
