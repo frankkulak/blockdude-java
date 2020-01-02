@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.List;
 
 import blockdude.util.GamePiece;
@@ -12,6 +11,7 @@ import blockdude.util.Level;
 import blockdude.util.LevelSet;
 import blockdude.util.LevelSetReader;
 import blockdude.util.Position;
+import util.TestUtil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -178,30 +178,131 @@ public class UtilTests {
 
   // There are no tests for LevelSet.Builder in this section since it is not public; it is tested as
   // part of the tests for LevelSetReader, since LevelSetReader depends on LevelSet.Builder
-  
+
   @Test
   public void levelSetCurrentLevelWorks() {
-    // todo
+    String firstLevelString = "-level tcP\n" +
+            "X__________________X\n" +
+            "X__________________X\n" +
+            "X__________________X\n" +
+            "X___X_______X______X\n" +
+            "XD__X___X_B_X_B_R__X\n" +
+            "XXXXXXXXXXXXXXXXXXXX\n" +
+            "-/level";
+    Level firstLevelExpected = TestUtil.levelFromString(firstLevelString);
+    Level firstLevel = levels.currentLevel();
+    assertTrue(TestUtil.layoutsAreSame(firstLevelExpected.layout(), firstLevel.layout()));
+
+    levels.nextLevel();
+    String secondLevelString = "-level ARo\n" +
+            "_X____XX________XX____\n" +
+            "_X________________X___\n" +
+            "XX_________________X__\n" +
+            "XD__________________X_\n" +
+            "XX___________________X\n" +
+            "_X___________X__B____X\n" +
+            "_X___________XB_BBR__X\n" +
+            "_XXXXX___XXXXXXXXXXXXX\n" +
+            "_____X__BX____________\n" +
+            "_____XXXXX____________\n" +
+            "-/level";
+    Level secondLevelExpected = TestUtil.levelFromString(secondLevelString);
+    Level secondLevel = levels.currentLevel();
+    assertTrue(TestUtil.layoutsAreSame(secondLevelExpected.layout(), secondLevel.layout()));
+
+    levels.tryPassword("wTF");
+    String lastLevelString = "-level wTF\n" +
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
+            "X__X___X____________________X\n" +
+            "X_____BXBB____________XXXXX_X\n" +
+            "XB___XXX_BXX_____B__XX__D_X_X\n" +
+            "XBB____XXX___R__B_______X_X_X\n" +
+            "XXX__BBX_____X_B__________X_X\n" +
+            "X___XXXX______X__XXX___XXX__X\n" +
+            "XB____________X_X______X__B_X\n" +
+            "XBB_______XXX_X_XB____X__XXXX\n" +
+            "XXXX_B___XXX__X_XXB__X_B_X__X\n" +
+            "X___________B_XXX__BX___X___X\n" +
+            "X___B_____BB_X___XXXX_______X\n" +
+            "X____XXXXXXXXX________XXXXX_X\n" +
+            "X______________B___BXX____X_X\n" +
+            "XXXX___________B___X____BBX_X\n" +
+            "XBXX___X____X__________XXXX_X\n" +
+            "XXBXXX_X____X___BBB_B_______X\n" +
+            "XBXBXBXX____X________BBB____X\n" +
+            "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
+            "-/level";
+    Level lastLevelExpected = TestUtil.levelFromString(lastLevelString);
+    Level lastLevel = levels.currentLevel();
+    assertTrue(TestUtil.layoutsAreSame(lastLevelExpected.layout(), lastLevel.layout()));
   }
 
   @Test
   public void levelSetCurrentLevelIndexWorks() {
-    // todo
+    assertEquals(0, levels.currentLevelIndex());
+
+    levels.nextLevel(); // 2nd level
+    assertEquals(1, levels.currentLevelIndex());
+
+    levels.tryPassword("wTF"); // 11th level
+    assertEquals(10, levels.currentLevelIndex());
+
+    levels.tryPassword("BAH"); // 5th level
+    assertEquals(4, levels.currentLevelIndex());
   }
 
   @Test
   public void levelSetNextLevelReturnsCorrectLevel() {
-    // todo
-  }
+    String firstLevelString = "-level tcP\n" +
+            "X__________________X\n" +
+            "X__________________X\n" +
+            "X__________________X\n" +
+            "X___X_______X______X\n" +
+            "XD__X___X_B_X_B_R__X\n" +
+            "XXXXXXXXXXXXXXXXXXXX\n" +
+            "-/level";
+    Level firstLevelExpected = TestUtil.levelFromString(firstLevelString);
+    Level firstLevel = levels.currentLevel();
+    assertEquals(0, levels.currentLevelIndex());
+    assertTrue(TestUtil.layoutsAreSame(firstLevelExpected.layout(), firstLevel.layout()));
 
-  @Test
-  public void levelSetNextLevelChangesCurrentLevelCorrectly() {
-    // todo
+    Level secondLevel = levels.nextLevel();
+    String secondLevelString = "-level ARo\n" +
+            "_X____XX________XX____\n" +
+            "_X________________X___\n" +
+            "XX_________________X__\n" +
+            "XD__________________X_\n" +
+            "XX___________________X\n" +
+            "_X___________X__B____X\n" +
+            "_X___________XB_BBR__X\n" +
+            "_XXXXX___XXXXXXXXXXXXX\n" +
+            "_____X__BX____________\n" +
+            "_____XXXXX____________\n" +
+            "-/level";
+    Level secondLevelExpected = TestUtil.levelFromString(secondLevelString);
+    Level secondLevelFromLevelSet = levels.currentLevel();
+    assertEquals(1, levels.currentLevelIndex());
+    assertTrue(TestUtil.layoutsAreSame(secondLevelExpected.layout(), secondLevel.layout()));
+    assertTrue(TestUtil.layoutsAreSame(secondLevelFromLevelSet.layout(), secondLevel.layout()));
   }
 
   @Test
   public void levelSetRestartSetsLevelIndexToZero() {
-    // todo
+    assertEquals(0, levels.currentLevelIndex());
+    levels.nextLevel();
+    assertNotEquals(0, levels.currentLevelIndex());
+    levels.restart();
+    assertEquals(0, levels.currentLevelIndex());
+
+    levels.tryPassword("BAH");
+    assertNotEquals(0, levels.currentLevelIndex());
+    levels.restart();
+    assertEquals(0, levels.currentLevelIndex());
+
+    levels.tryPassword("wTF");
+    assertNotEquals(0, levels.currentLevelIndex());
+    levels.restart();
+    assertEquals(0, levels.currentLevelIndex());
   }
 
   @Test
@@ -258,7 +359,7 @@ public class UtilTests {
 
   @Test(expected = IllegalStateException.class)
   public void levelSetFileReaderThrowsISEForFileWithIncorrectLevelFormat() {
-    // todo repeat tests for level builder
+    // todo
   }
 
   /* Position Tests ----------------------------------------------------------------------------- */
