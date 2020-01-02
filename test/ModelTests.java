@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.StringReader;
 import java.util.List;
 
 import blockdude.model.BlockDudeModel;
@@ -13,6 +12,7 @@ import blockdude.util.GamePiece;
 import blockdude.util.Level;
 import blockdude.util.LevelSet;
 import blockdude.util.LevelSetReader;
+import util.TestUtil;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +25,8 @@ public class ModelTests {
   // Model example for use in tests
   private BlockDudeModel model;
   private static LevelSet levels;
+
+  /* JUnit Setup -------------------------------------------------------------------------------- */
 
   @BeforeClass
   public static void onlyOnce() {
@@ -56,7 +58,7 @@ public class ModelTests {
     List<List<GamePiece>> originalModelLayout = model.layoutToRender();
     model.restartLevel();
     List<List<GamePiece>> newModelLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalModelLayout, newModelLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalModelLayout, newModelLayout));
   }
 
   @Test
@@ -68,21 +70,21 @@ public class ModelTests {
     // testing just one move
     model.moveLeft();
     List<List<GamePiece>> modelLayoutAfterMovingLeft = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalModelLayout, modelLayoutAfterMovingLeft));
+    assertFalse(TestUtil.layoutsAreSame(originalModelLayout, modelLayoutAfterMovingLeft));
     model.restartLevel();
     List<List<GamePiece>> modelLayoutAfterFirstRestart = model.layoutToRender();
-    assertFalse(layoutsAreSame(modelLayoutAfterMovingLeft, modelLayoutAfterFirstRestart));
-    assertTrue(layoutsAreSame(originalModelLayout, modelLayoutAfterFirstRestart));
+    assertFalse(TestUtil.layoutsAreSame(modelLayoutAfterMovingLeft, modelLayoutAfterFirstRestart));
+    assertTrue(TestUtil.layoutsAreSame(originalModelLayout, modelLayoutAfterFirstRestart));
 
     // testing more than one move
     model.moveLeft();
     model.moveUp();
     List<List<GamePiece>> modelLayoutAfterMovingLeftAndUp = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalModelLayout, modelLayoutAfterMovingLeftAndUp));
+    assertFalse(TestUtil.layoutsAreSame(originalModelLayout, modelLayoutAfterMovingLeftAndUp));
     model.restartLevel();
     List<List<GamePiece>> modelLayoutAfterSecondRestart = model.layoutToRender();
-    assertFalse(layoutsAreSame(modelLayoutAfterMovingLeftAndUp, modelLayoutAfterSecondRestart));
-    assertTrue(layoutsAreSame(originalModelLayout, modelLayoutAfterSecondRestart));
+    assertFalse(TestUtil.layoutsAreSame(modelLayoutAfterMovingLeftAndUp, modelLayoutAfterSecondRestart));
+    assertTrue(TestUtil.layoutsAreSame(originalModelLayout, modelLayoutAfterSecondRestart));
   }
 
   @Test
@@ -93,11 +95,11 @@ public class ModelTests {
     Level secondLevel = levels.nextLevel();
     model.loadLevel(secondLevel);
     List<List<GamePiece>> secondModelLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(firstModelLayout, secondModelLayout));
+    assertFalse(TestUtil.layoutsAreSame(firstModelLayout, secondModelLayout));
     model.restartLevel();
     List<List<GamePiece>> restartedModelLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(firstModelLayout, restartedModelLayout));
-    assertTrue(layoutsAreSame(secondModelLayout, restartedModelLayout));
+    assertFalse(TestUtil.layoutsAreSame(firstModelLayout, restartedModelLayout));
+    assertTrue(TestUtil.layoutsAreSame(secondModelLayout, restartedModelLayout));
   }
 
   /* loadLevel(...) Tests ----------------------------------------------------------------------- */
@@ -114,19 +116,19 @@ public class ModelTests {
     List<List<GamePiece>> firstLevelLayout = firstLevel.layout();
     model.loadLevel(firstLevel);
     List<List<GamePiece>> firstModelLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(firstLevelLayout, firstModelLayout));
+    assertTrue(TestUtil.layoutsAreSame(firstLevelLayout, firstModelLayout));
 
     // testing loading second level
     Level secondLevel = levels.nextLevel();
     List<List<GamePiece>> secondLevelLayout = secondLevel.layout();
     model.loadLevel(secondLevel);
     List<List<GamePiece>> secondModelLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(secondLevelLayout, secondModelLayout));
+    assertTrue(TestUtil.layoutsAreSame(secondLevelLayout, secondModelLayout));
 
     // testing interactivity of loaded levels
-    assertFalse(layoutsAreSame(firstLevelLayout, secondModelLayout));
-    assertFalse(layoutsAreSame(secondLevelLayout, firstModelLayout));
-    assertFalse(layoutsAreSame(firstModelLayout, secondModelLayout));
+    assertFalse(TestUtil.layoutsAreSame(firstLevelLayout, secondModelLayout));
+    assertFalse(TestUtil.layoutsAreSame(secondLevelLayout, firstModelLayout));
+    assertFalse(TestUtil.layoutsAreSame(firstModelLayout, secondModelLayout));
   }
 
   /* moveLeft() Tests --------------------------------------------------------------------------- */
@@ -143,7 +145,7 @@ public class ModelTests {
               "L_X\n" +
               "XXX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -159,7 +161,7 @@ public class ModelTests {
               "_LX\n" +
               "_XX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -174,13 +176,13 @@ public class ModelTests {
             "X_BL_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, resultLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, resultLayout));
   }
 
   @Test
@@ -190,28 +192,28 @@ public class ModelTests {
             "X_BLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterPickUp = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterPickUp));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterPickUp));
     assertTrue(model.moveLeft());
     List<List<GamePiece>> layoutAfterFirstMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(layoutAfterPickUp, layoutAfterFirstMove));
+    assertFalse(TestUtil.layoutsAreSame(layoutAfterPickUp, layoutAfterFirstMove));
     assertFalse(model.moveLeft());
     List<List<GamePiece>> layoutAfterSecondMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterFirstMove, layoutAfterSecondMove));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterFirstMove, layoutAfterSecondMove));
 
     String expectedResultString = "-level test\n" +
             "XX__X\n" +
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterSecondMove, expectedLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterSecondMove, expectedLayout));
   }
 
   @Test
@@ -220,21 +222,21 @@ public class ModelTests {
             "X_BR_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X_BL_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -243,21 +245,21 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "XL__X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -266,21 +268,21 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "XL__X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -291,13 +293,13 @@ public class ModelTests {
             "X_XX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X__X\n" +
@@ -305,9 +307,9 @@ public class ModelTests {
             "XLXX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -316,7 +318,7 @@ public class ModelTests {
             "XDLX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -324,15 +326,15 @@ public class ModelTests {
     assertTrue(model.moveLeft());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
     assertTrue(model.isLevelCompleted());
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   /* moveRight() Tests -------------------------------------------------------------------------- */
@@ -349,7 +351,7 @@ public class ModelTests {
               "X_R\n" +
               "XXX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -365,7 +367,7 @@ public class ModelTests {
               "XR_\n" +
               "XX_\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -380,13 +382,13 @@ public class ModelTests {
             "X_RB_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, resultLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, resultLayout));
   }
 
   @Test
@@ -396,28 +398,28 @@ public class ModelTests {
             "XRB_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterPickUp = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterPickUp));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterPickUp));
     assertTrue(model.moveRight());
     List<List<GamePiece>> layoutAfterFirstMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(layoutAfterPickUp, layoutAfterFirstMove));
+    assertFalse(TestUtil.layoutsAreSame(layoutAfterPickUp, layoutAfterFirstMove));
     assertFalse(model.moveRight());
     List<List<GamePiece>> layoutAfterSecondMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterFirstMove, layoutAfterSecondMove));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterFirstMove, layoutAfterSecondMove));
 
     String expectedResultString = "-level test\n" +
             "X__XX\n" +
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterSecondMove, expectedLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterSecondMove, expectedLayout));
   }
 
   @Test
@@ -426,21 +428,21 @@ public class ModelTests {
             "X_LB_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X_RB_X\n" +
             "XXXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -449,21 +451,21 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X__RX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -472,21 +474,21 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X__RX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -497,13 +499,13 @@ public class ModelTests {
             "XX_X\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X__X\n" +
@@ -511,9 +513,9 @@ public class ModelTests {
             "XXRX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   @Test
@@ -522,7 +524,7 @@ public class ModelTests {
             "XRDX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -530,15 +532,15 @@ public class ModelTests {
     assertTrue(model.moveRight());
     List<List<GamePiece>> resultLayout = model.layoutToRender();
     assertTrue(model.isLevelCompleted());
-    assertFalse(layoutsAreSame(originalLayout, resultLayout));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, resultLayout));
 
     String expectedResultString = "-level test\n" +
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(resultLayout, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(resultLayout, expectedResultLayout));
   }
 
   /* moveUp() Tests ----------------------------------------------------------------------------- */
@@ -555,7 +557,7 @@ public class ModelTests {
               "XLX\n" +
               "XXX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -571,7 +573,7 @@ public class ModelTests {
               "XRX\n" +
               "XXX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
     } catch (RuntimeException e) {
       fail("RuntimeException thrown too soon: " + e.getMessage());
@@ -587,13 +589,13 @@ public class ModelTests {
             "_L_\n" +
             "XXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -603,13 +605,13 @@ public class ModelTests {
             "_R_\n" +
             "XXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -619,13 +621,13 @@ public class ModelTests {
             "XLX\n" +
             "XXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -635,13 +637,13 @@ public class ModelTests {
             "XRX\n" +
             "XXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -652,17 +654,17 @@ public class ModelTests {
             "XXBLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     assertTrue(model.moveLeft());
     List<List<GamePiece>> layoutAfterMovingLeft = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMovingLeft));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMovingLeft));
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMovingUp = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterMovingLeft, layoutAfterMovingUp));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMovingLeft, layoutAfterMovingUp));
 
     String expectedResultString = "-level test\n" +
             "XX__X\n" +
@@ -670,9 +672,9 @@ public class ModelTests {
             "XXL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMovingUp, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMovingUp, expectedResultLayout));
   }
 
   @Test
@@ -683,17 +685,17 @@ public class ModelTests {
             "XRBXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     assertTrue(model.moveRight());
     List<List<GamePiece>> layoutAfterMovingRight = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMovingRight));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMovingRight));
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMovingUp = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterMovingRight, layoutAfterMovingUp));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMovingRight, layoutAfterMovingUp));
 
     String expectedResultString = "-level test\n" +
             "X__XX\n" +
@@ -701,9 +703,9 @@ public class ModelTests {
             "X_RXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMovingUp, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMovingUp, expectedResultLayout));
   }
 
   @Test
@@ -713,13 +715,13 @@ public class ModelTests {
             "X_LXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -729,13 +731,13 @@ public class ModelTests {
             "XXR_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
   }
 
   @Test
@@ -745,19 +747,19 @@ public class ModelTests {
             "XXBLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterPickUp = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterPickUp));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterPickUp));
     assertTrue(model.moveLeft());
     List<List<GamePiece>> layoutAfterMoveLeft = model.layoutToRender();
-    assertFalse(layoutsAreSame(layoutAfterPickUp, layoutAfterMoveLeft));
+    assertFalse(TestUtil.layoutsAreSame(layoutAfterPickUp, layoutAfterMoveLeft));
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMoveUp = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterMoveLeft, layoutAfterMoveUp));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMoveLeft, layoutAfterMoveUp));
   }
 
   @Test
@@ -767,19 +769,19 @@ public class ModelTests {
             "XRBXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterPickUp = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterPickUp));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterPickUp));
     assertTrue(model.moveRight());
     List<List<GamePiece>> layoutAfterMoveRight = model.layoutToRender();
-    assertFalse(layoutsAreSame(layoutAfterPickUp, layoutAfterMoveRight));
+    assertFalse(TestUtil.layoutsAreSame(layoutAfterPickUp, layoutAfterMoveRight));
     assertFalse(model.moveUp());
     List<List<GamePiece>> layoutAfterMoveUp = model.layoutToRender();
-    assertTrue(layoutsAreSame(layoutAfterMoveRight, layoutAfterMoveUp));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMoveRight, layoutAfterMoveUp));
   }
 
   @Test
@@ -789,22 +791,22 @@ public class ModelTests {
             "XXLXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "XL__X\n" +
             "XX_XX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -814,22 +816,22 @@ public class ModelTests {
             "XXRXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "X__RX\n" +
             "XX_XX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -839,22 +841,22 @@ public class ModelTests {
             "XXLX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "XL_X\n" +
             "XX_X\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -864,22 +866,22 @@ public class ModelTests {
             "XRXX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "X_RX\n" +
             "X_XX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -889,14 +891,14 @@ public class ModelTests {
             "XXLX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
     assertTrue(model.isLevelCompleted());
 
     String expectedResultString = "-level test\n" +
@@ -904,9 +906,9 @@ public class ModelTests {
             "XX_X\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -916,14 +918,14 @@ public class ModelTests {
             "XRXX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.moveUp());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
     assertTrue(model.isLevelCompleted());
 
     String expectedResultString = "-level test\n" +
@@ -931,9 +933,9 @@ public class ModelTests {
             "X_XX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   /* pickUpOrPutDown() Tests -------------------------------------------------------------------- */
@@ -953,7 +955,7 @@ public class ModelTests {
               "BL\n" +
               "XX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
 
       assertTrue(model.pickUpOrPutDown());
@@ -973,7 +975,7 @@ public class ModelTests {
               "RB\n" +
               "XX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
 
       assertTrue(model.pickUpOrPutDown());
@@ -993,7 +995,7 @@ public class ModelTests {
               "_BL\n" +
               "_XX\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
 
       assertTrue(model.pickUpOrPutDown());
@@ -1013,7 +1015,7 @@ public class ModelTests {
               "RB_\n" +
               "XX_\n" +
               "-/level";
-      Level level = levelFromString(levelString);
+      Level level = TestUtil.levelFromString(levelString);
       model.loadLevel(level);
 
       assertTrue(model.pickUpOrPutDown());
@@ -1032,13 +1034,13 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1048,13 +1050,13 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1064,13 +1066,13 @@ public class ModelTests {
             "XXL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1080,13 +1082,13 @@ public class ModelTests {
             "X_RXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1096,13 +1098,13 @@ public class ModelTests {
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1112,13 +1114,13 @@ public class ModelTests {
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1128,7 +1130,7 @@ public class ModelTests {
             "XBLX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1141,9 +1143,9 @@ public class ModelTests {
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1153,7 +1155,7 @@ public class ModelTests {
             "XRBX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1166,9 +1168,9 @@ public class ModelTests {
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1178,7 +1180,7 @@ public class ModelTests {
             "X_BLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1191,9 +1193,9 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1203,7 +1205,7 @@ public class ModelTests {
             "XRB_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1216,9 +1218,9 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1228,7 +1230,7 @@ public class ModelTests {
             "X_BLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1241,9 +1243,9 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1253,7 +1255,7 @@ public class ModelTests {
             "XRB_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1266,9 +1268,9 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1278,7 +1280,7 @@ public class ModelTests {
             "XXBLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1291,9 +1293,9 @@ public class ModelTests {
             "XXL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1303,7 +1305,7 @@ public class ModelTests {
             "XRBXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1316,9 +1318,9 @@ public class ModelTests {
             "X_RXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1328,7 +1330,7 @@ public class ModelTests {
             "XBBLX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1341,9 +1343,9 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1353,7 +1355,7 @@ public class ModelTests {
             "XRBBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1366,9 +1368,9 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1380,7 +1382,7 @@ public class ModelTests {
             "X_XXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1395,9 +1397,9 @@ public class ModelTests {
             "XBXXX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   @Test
@@ -1409,7 +1411,7 @@ public class ModelTests {
             "XXX_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertTrue(model.pickUpOrPutDown());
@@ -1424,9 +1426,9 @@ public class ModelTests {
             "XXXBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(expectedResultLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedResultLayout, finalLayout));
   }
 
   // picking block up
@@ -1437,13 +1439,13 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1452,13 +1454,13 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1468,13 +1470,13 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1484,13 +1486,13 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1499,13 +1501,13 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1514,13 +1516,13 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1530,13 +1532,13 @@ public class ModelTests {
             "X_LBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1546,13 +1548,13 @@ public class ModelTests {
             "XBR_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1562,13 +1564,13 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1578,13 +1580,13 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.pickUpOrPutDown());
     List<List<GamePiece>> newLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, newLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, newLayout));
   }
 
   @Test
@@ -1594,22 +1596,22 @@ public class ModelTests {
             "XBL_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "X_B_X\n" +
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   @Test
@@ -1619,22 +1621,22 @@ public class ModelTests {
             "X_RBX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertTrue(model.pickUpOrPutDown());
     List<List<GamePiece>> layoutAfterMove = model.layoutToRender();
-    assertFalse(layoutsAreSame(originalLayout, layoutAfterMove));
+    assertFalse(TestUtil.layoutsAreSame(originalLayout, layoutAfterMove));
 
     String expectedResultString = "-level test\n" +
             "X_B_X\n" +
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedResult = levelFromString(expectedResultString);
+    Level expectedResult = TestUtil.levelFromString(expectedResultString);
     List<List<GamePiece>> expectedResultLayout = expectedResult.layout();
-    assertTrue(layoutsAreSame(layoutAfterMove, expectedResultLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMove, expectedResultLayout));
   }
 
   /* layoutToRender() Tests --------------------------------------------------------------------- */
@@ -1658,12 +1660,12 @@ public class ModelTests {
             "XD__X___X_B_X_B_R__X\n" +
             "XXXXXXXXXXXXXXXXXXXX\n" +
             "-/level";
-    Level firstLevel = levelFromString(firstLevelString);
+    Level firstLevel = TestUtil.levelFromString(firstLevelString);
     List<List<GamePiece>> firstLevelLayout = firstLevel.layout();
     model.loadLevel(firstLevel);
-    assertTrue(layoutsAreSame(firstLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(firstLevelLayout, model.layoutToRender()));
     model.restartLevel();
-    assertTrue(layoutsAreSame(firstLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(firstLevelLayout, model.layoutToRender()));
 
     String secondLevelString = "-level ARo\n" +
             "_X____XX________XX____\n" +
@@ -1677,12 +1679,12 @@ public class ModelTests {
             "_____X__BX____________\n" +
             "_____XXXXX____________\n" +
             "-/level";
-    Level secondLevel = levelFromString(secondLevelString);
+    Level secondLevel = TestUtil.levelFromString(secondLevelString);
     List<List<GamePiece>> secondLevelLayout = secondLevel.layout();
     model.loadLevel(secondLevel);
-    assertTrue(layoutsAreSame(secondLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(secondLevelLayout, model.layoutToRender()));
     model.restartLevel();
-    assertTrue(layoutsAreSame(secondLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(secondLevelLayout, model.layoutToRender()));
   }
 
   @Test
@@ -1695,11 +1697,11 @@ public class ModelTests {
             "XD__X___X_B_X_B_R__X\n" +
             "XXXXXXXXXXXXXXXXXXXX\n" +
             "-/level";
-    Level firstLevel = levelFromString(firstLevelString);
+    Level firstLevel = TestUtil.levelFromString(firstLevelString);
     List<List<GamePiece>> firstLevelLayout = firstLevel.layout();
     model.loadLevel(firstLevel);
 
-    assertTrue(layoutsAreSame(firstLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(firstLevelLayout, model.layoutToRender()));
     model.moveLeft();
     model.pickUpOrPutDown();
     model.moveLeft();
@@ -1716,11 +1718,11 @@ public class ModelTests {
             "XD__X___X_B_XB_____X\n" +
             "XXXXXXXXXXXXXXXXXXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(layoutAfterMoving, expectedLayout));
+    assertTrue(TestUtil.layoutsAreSame(layoutAfterMoving, expectedLayout));
     model.restartLevel();
-    assertTrue(layoutsAreSame(firstLevelLayout, model.layoutToRender()));
+    assertTrue(TestUtil.layoutsAreSame(firstLevelLayout, model.layoutToRender()));
   }
 
   @Test
@@ -1729,7 +1731,7 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveLeft();
@@ -1739,9 +1741,9 @@ public class ModelTests {
             "XL__X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   @Test
@@ -1750,7 +1752,7 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveLeft();
@@ -1760,9 +1762,9 @@ public class ModelTests {
             "XL__X\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   @Test
@@ -1771,7 +1773,7 @@ public class ModelTests {
             "X_L_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveRight();
@@ -1781,9 +1783,9 @@ public class ModelTests {
             "X__RX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   @Test
@@ -1792,7 +1794,7 @@ public class ModelTests {
             "X_R_X\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveRight();
@@ -1802,9 +1804,9 @@ public class ModelTests {
             "X__RX\n" +
             "XXXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   @Test
@@ -1813,13 +1815,13 @@ public class ModelTests {
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveLeft());
     List<List<GamePiece>> finalLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, finalLayout));
   }
 
   @Test
@@ -1828,13 +1830,13 @@ public class ModelTests {
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     List<List<GamePiece>> originalLayout = model.layoutToRender();
     assertFalse(model.moveRight());
     List<List<GamePiece>> finalLayout = model.layoutToRender();
-    assertTrue(layoutsAreSame(originalLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(originalLayout, finalLayout));
   }
 
   @Test
@@ -1843,7 +1845,7 @@ public class ModelTests {
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveLeft();
@@ -1853,9 +1855,9 @@ public class ModelTests {
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   @Test
@@ -1864,7 +1866,7 @@ public class ModelTests {
             "XL_X\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     model.moveRight();
@@ -1874,9 +1876,9 @@ public class ModelTests {
             "X_RX\n" +
             "XXXX\n" +
             "-/level";
-    Level expectedLayoutLevel = levelFromString(expectedLayoutString);
+    Level expectedLayoutLevel = TestUtil.levelFromString(expectedLayoutString);
     List<List<GamePiece>> expectedLayout = expectedLayoutLevel.layout();
-    assertTrue(layoutsAreSame(expectedLayout, finalLayout));
+    assertTrue(TestUtil.layoutsAreSame(expectedLayout, finalLayout));
   }
 
   /* isLevelCompleted() Tests ------------------------------------------------------------------- */
@@ -1901,7 +1903,7 @@ public class ModelTests {
             "XD_B_LX\n" +
             "XXXXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -1931,7 +1933,7 @@ public class ModelTests {
             "XD_LX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -1949,7 +1951,7 @@ public class ModelTests {
             "XR_DX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -1968,7 +1970,7 @@ public class ModelTests {
             "XX_LX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -1987,7 +1989,7 @@ public class ModelTests {
             "XR_XX\n" +
             "XXXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -2007,7 +2009,7 @@ public class ModelTests {
             "XDXX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -2025,7 +2027,7 @@ public class ModelTests {
             "XXDX\n" +
             "XXXX\n" +
             "-/level";
-    Level level = levelFromString(levelString);
+    Level level = TestUtil.levelFromString(levelString);
     model.loadLevel(level);
 
     assertFalse(model.isLevelCompleted());
@@ -2033,182 +2035,6 @@ public class ModelTests {
     assertTrue(model.isLevelCompleted());
     model.restartLevel();
     assertFalse(model.isLevelCompleted());
-  }
-
-  /* Private helper methods --------------------------------------------------------------------- */
-
-  /**
-   * Determines whether two given layouts are identical.
-   *
-   * @param lo1 first layout to compare
-   * @param lo2 second layout to compare
-   * @return true if layouts are exactly the same, false otherwise
-   */
-  private static boolean layoutsAreSame(List<List<GamePiece>> lo1, List<List<GamePiece>> lo2) {
-    if (lo1.size() != lo2.size()) return false;
-
-    for (int row = 0; row < lo1.size(); row++) {
-      List<GamePiece> row1 = lo1.get(row);
-      List<GamePiece> row2 = lo2.get(row);
-      if (row1.size() != row2.size()) return false;
-
-      for (int col = 0; col < row1.size(); col++) {
-        GamePiece piece1 = row1.get(col);
-        GamePiece piece2 = row2.get(col);
-        if (piece1 != piece2) return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Parses and returns a Level from the given String.
-   *
-   * @param levelString String describing Level
-   * @return Level parsed from given String
-   * @throws IllegalStateException if given String could not be parsed as Level
-   */
-  private static Level levelFromString(String levelString) throws IllegalStateException {
-    StringReader stringReader = new StringReader(levelString);
-    LevelSet levels = LevelSetReader.parseLevelSet(stringReader);
-    return levels.currentLevel();
-  }
-
-  /* Helper method tests ------------------------------------------------------------------------ */
-
-  // These tests are intentionally not as intensive as those for the actual Block Dude program,
-  // since I am the only one who will be using these methods; therefore, it is pointless to test
-  // what would happen if, say, levelFromString(...) is passed null or "", as I will not do that.
-  // The purpose of these tests is just for my sanity to make sure that they work as intended.
-
-  // layoutsAreSame(...) tests
-
-  @Test
-  public void layoutsAreSameReturnsTrueWhenSame() {
-    String firstLevelString = "-level tcP\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X___X_______X______X\n" +
-            "XD__X___X_B_X_B_R__X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    Level firstLevelFromString = levelFromString(firstLevelString);
-    Level firstLevel = levels.currentLevel();
-    assertTrue(layoutsAreSame(firstLevel.layout(), firstLevel.layout()));
-    assertTrue(layoutsAreSame(firstLevelFromString.layout(), firstLevel.layout()));
-
-    String secondLevelString = "-level ARo\n" +
-            "_X____XX________XX____\n" +
-            "_X________________X___\n" +
-            "XX_________________X__\n" +
-            "XD__________________X_\n" +
-            "XX___________________X\n" +
-            "_X___________X__B____X\n" +
-            "_X___________XB_BBR__X\n" +
-            "_XXXXX___XXXXXXXXXXXXX\n" +
-            "_____X__BX____________\n" +
-            "_____XXXXX____________\n" +
-            "-/level";
-    Level secondLevelFromString = levelFromString(secondLevelString);
-    Level secondLevel = levels.nextLevel();
-    assertTrue(layoutsAreSame(secondLevel.layout(), secondLevel.layout()));
-    assertTrue(layoutsAreSame(secondLevelFromString.layout(), secondLevel.layout()));
-  }
-
-  @Test
-  public void layoutsAreSameReturnsFalseWhenCompletelyDifferent() {
-    Level firstLevel = levels.currentLevel();
-    Level secondLevel = levels.nextLevel();
-    assertFalse(layoutsAreSame(firstLevel.layout(), secondLevel.layout()));
-  }
-
-  @Test
-  public void layoutsAreSameReturnsFalseWhenDifferentSize() {
-    String firstLevelMissingRowsString = "-level tcP\n" +
-            "X__________________X\n" +
-            "X___X_______X______X\n" +
-            "XD__X___X_B_X_B_R__X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    Level firstLevelMissingRows = levelFromString(firstLevelMissingRowsString);
-    Level firstLevel = levels.currentLevel();
-    assertFalse(layoutsAreSame(firstLevel.layout(), firstLevelMissingRows.layout()));
-  }
-
-  @Test
-  public void layoutsAreSameReturnsFalseWhenSameSizeButDifferentContents() {
-    String firstLevelDifContentsString = "-level tcP\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X___X_______X______X\n" +
-            "XD_XX___X_B_X_B_L__X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    Level firstLevelDifContents = levelFromString(firstLevelDifContentsString);
-    Level firstLevel = levels.currentLevel();
-    assertFalse(layoutsAreSame(firstLevel.layout(), firstLevelDifContents.layout()));
-  }
-
-  // levelFromString(...) tests
-
-  @Test(expected = IllegalStateException.class)
-  public void levelFromStringThrowsISEWhenStringContainsMoreThanOnePlayer() {
-    String firstLevelWithSecondPlayer = "-level tcP\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X___________L______X\n" +
-            "X___X_______X______X\n" +
-            "XD__X___X_B_X_B_R__X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    levelFromString(firstLevelWithSecondPlayer);
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void levelFromStringThrowsISEWhenStringContainsNoPlayer() {
-    String firstLevelWithoutPlayer = "-level tcP\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X___X_______X______X\n" +
-            "XD__X___X_B_X_B____X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    levelFromString(firstLevelWithoutPlayer);
-  }
-
-  @Test
-  public void levelFromStringReturnsCorrectLevel() {
-    String firstLevelString = "-level tcP\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X__________________X\n" +
-            "X___X_______X______X\n" +
-            "XD__X___X_B_X_B_R__X\n" +
-            "XXXXXXXXXXXXXXXXXXXX\n" +
-            "-/level";
-    Level firstLevelFromString = levelFromString(firstLevelString);
-    Level firstLevel = levels.currentLevel();
-    layoutsAreSame(firstLevel.layout(), firstLevelFromString.layout());
-
-    String secondLevelString = "-level ARo\n" +
-            "_X____XX________XX____\n" +
-            "_X________________X___\n" +
-            "XX_________________X__\n" +
-            "XD__________________X_\n" +
-            "XX___________________X\n" +
-            "_X___________X__B____X\n" +
-            "_X___________XB_BBR__X\n" +
-            "_XXXXX___XXXXXXXXXXXXX\n" +
-            "_____X__BX____________\n" +
-            "_____XXXXX____________\n" +
-            "-/level";
-    Level secondLevelFromString = levelFromString(secondLevelString);
-    Level secondLevel = levels.nextLevel();
-    layoutsAreSame(secondLevel.layout(), secondLevelFromString.layout());
   }
 
 }
