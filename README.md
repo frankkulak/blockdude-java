@@ -2,7 +2,7 @@
 
 This project was inspired by the TI-84 game _Block Dude_ (created by Brandon Sterner), but is not meant to be an exact replica - its purpose is for my own practice with the MVC design pattern. You can find an exact replica of _Block Dude_, created by Andrew Zich, [here](http://azich.org/blockdude/).
 
-I started this project in April 2019, but created this repository and touched up the code in October 2019. I plan to come back to this project to add unit tests and a more user-friendly view.
+I started this project in April 2019, but created this repository and touched up the code in October 2019. I plan to come back to this project to add more unit tests and a user-friendly view using Java Swing.
 
 ## Playing the game
 
