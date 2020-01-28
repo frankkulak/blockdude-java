@@ -12,7 +12,7 @@ To run this project in your console with the levels from the original _Block Dud
 >
 > `-source`: Specifies the name of the file from which to read level data. The name must include the file's extension, and this file must be located in the levelSources directory. There is an existing file named `levels.txt` that contains data for the levels from the original _Block Dude_ game.
 >
-> `-view`: Specifies the type of view to use when running the game. As of right now, the only supported view is a text view that runs the game in the console of your IDE; this view can be speicifed using the value `text`.
+> `-view`: Specifies the type of view to use when running the game. As of right now, the only supported view is a text view that runs the game in the console of your IDE; this view can be specified using the value `text`.
 
 ## Bugs
 
